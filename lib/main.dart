@@ -1,11 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:omjh/bloc/splash_bloc.dart';
 import 'package:omjh/page/login_page.dart';
 
 void main() {
   runApp(const MyApp());
 }
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -14,11 +15,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'One Man Jiang Hu',
-      theme:
-          ThemeData(primarySwatch: Colors.blue, primaryColor: Colors.black54),
-      home: const SplashPage(),
-    );
+        title: 'One Man Jiang Hu',
+        navigatorKey: navigatorKey,
+        theme:
+            ThemeData(primarySwatch: Colors.blue, primaryColor: Colors.black54),
+        home: const SplashPage(),
+        routes: {'login': (context) => const LoginPage()});
   }
 }
 
@@ -30,16 +32,19 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  final SplashBloc _bloc = SplashBloc();
+
   @override
   void initState() {
     super.initState();
-    Timer.run(() {
-          Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const LoginPage()));
-    });
-
+    //_bloc.getVersion();
   }
 
+  @override
+  void dispose() {
+    _bloc.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
