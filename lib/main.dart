@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:omjh/bloc/splash_bloc.dart';
-import 'package:omjh/page/login_page.dart';
+import 'package:omjh/common/app_translation.dart';
+import 'package:omjh/common/theme_style.dart';
+import 'package:omjh/page/home_page.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(GetMaterialApp(
+    home: const MyApp(),
+    translations: AppTranslation(),
+    locale: const Locale('zh', 'CN'),
+    fallbackLocale: const Locale('zh', 'CN'),
+  ));
 }
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -16,11 +23,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'One Man Jiang Hu',
-        navigatorKey: navigatorKey,
-        theme:
-            ThemeData(primarySwatch: Colors.blue, primaryColor: Colors.black54),
-        home: const SplashPage(),
-        routes: {'login': (context) => const LoginPage()});
+        theme: ThemeData(
+            primarySwatch: Colors.blue,
+            primaryColor: ThemeStyle.bgColor),
+        home: const SplashPage());
   }
 }
 
@@ -37,7 +43,20 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    //_bloc.getVersion();
+    checkVersion();
+  }
+
+  void checkVersion() async {
+    int minVersion = await _bloc.getVersion();
+    if (minVersion == 0) return;
+    PackageInfo info = await PackageInfo.fromPlatform();
+    int currentVersion = int.parse(info.buildNumber);
+    if (currentVersion < minVersion) {
+      Get.rawSnackbar(message: 'Please update to latest version to continute.');
+      return;
+    }
+
+    Get.offAll(const HomePage());
   }
 
   @override

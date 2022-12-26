@@ -1,11 +1,12 @@
+import 'package:get/get.dart';
 import 'package:omjh/bloc/bloc.dart';
 import 'package:omjh/common/repository.dart';
 
 class SplashBloc implements Bloc {
-  final Repository _repository = Repository();
+  final Repository _repository = Get.put(Repository());
 
-  getVersion() async {
-    await _repository.getVersion();
+  Future<int> getVersion() async {
+    return await _repository.getVersion();
   }
   
   @override

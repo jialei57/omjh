@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:omjh/bloc/login_bloc.dart';
 import 'package:omjh/common/theme_style.dart';
+import 'package:omjh/page/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -37,12 +39,12 @@ class _LoginPageState extends State<LoginPage> {
       padding:
           const EdgeInsets.only(left: 20.0, right: 20.0, top: 40, bottom: 0),
       child: TextFormField(
-        decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'User Name',
-            hintText: 'User Name'),
+        decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText: 'user_name'.tr,
+            hintText: 'user_name'.tr),
         validator: (value) => (value == null || value.isEmpty)
-            ? 'User name can not be empty'
+            ? 'user_name_cannot_empty'.tr
             : null,
         controller: _usernameController,
       ),
@@ -53,15 +55,14 @@ class _LoginPageState extends State<LoginPage> {
     return Padding(
       padding:
           const EdgeInsets.only(left: 20.0, right: 20.0, top: 15, bottom: 0),
-      //padding: EdgeInsets.symmetric(horizontal: 15),
       child: TextFormField(
         obscureText: true,
-        decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Password',
-            hintText: 'Enter secure password'),
+        decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText: 'password'.tr,
+            hintText: 'password'.tr),
         validator: (value) => (value == null || value.isEmpty)
-            ? 'Password can not be empty'
+            ? 'password_cannot_empty'.tr
             : null,
         controller: _passwordController,
       ),
@@ -70,25 +71,32 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildLoginButton() {
     return Container(
-      height: 50,
-      width: 250,
       margin: const EdgeInsets.only(top: 30, bottom: 50),
-      decoration: BoxDecoration(
-          color: ThemeStyle.bgColor, borderRadius: BorderRadius.circular(20)),
-      child: TextButton(
-        onPressed: () {
-          if (validate()) {
-            _bloc
-                .authendicate(
-                    _usernameController.text, _passwordController.text)
-                .then((token) => {if (token != null && token.isNotEmpty) {}});
-          }
-        },
-        child: const Text(
-          'Login',
-          style: TextStyle(color: Colors.white, fontSize: 20),
-        ),
-      ),
+      width: 250,
+      height: 50,
+      child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+              backgroundColor: ThemeStyle.bgColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18))),
+          onPressed: () {
+            if (validate()) {
+              _bloc
+                  .authendicate(
+                      _usernameController.text, _passwordController.text)
+                  .then((token) => {
+                        if (token != null && token.isNotEmpty)
+                          {Get.offAll(const HomePage())}
+                      });
+            }
+          },
+          child: Text(
+            'login'.tr,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontFamily: 'NanFengXingShu'),
+          )),
     );
   }
 
