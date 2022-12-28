@@ -45,7 +45,10 @@ class ApiHelper {
           return null;
         }
 
-        Get.offAll(const LoginPage());
+        Get.offAll(()=> const LoginPage());
+        return null;
+      case 404:
+        Get.offAll(()=> const LoginPage());
         return null;
       default:
         return null;

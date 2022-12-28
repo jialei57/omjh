@@ -86,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                       _usernameController.text, _passwordController.text)
                   .then((token) => {
                         if (token != null && token.isNotEmpty)
-                          {Get.offAll(const HomePage())}
+                          {Get.offAll(()=> const HomePage())}
                       });
             }
           },

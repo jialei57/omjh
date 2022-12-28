@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:omjh/bloc/splash_bloc.dart';
 import 'package:omjh/common/app_translation.dart';
+import 'package:omjh/common/common.dart';
+import 'package:omjh/common/shared.dart';
 import 'package:omjh/common/theme_style.dart';
+import 'package:omjh/entity/character.dart';
 import 'package:omjh/page/home_page.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -24,8 +28,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'One Man Jiang Hu',
         theme: ThemeData(
-            primarySwatch: Colors.blue,
-            primaryColor: ThemeStyle.bgColor),
+            primarySwatch: Colors.blue, primaryColor: ThemeStyle.bgColor),
         home: const SplashPage());
   }
 }
@@ -43,10 +46,10 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    checkVersion();
+    prepare();
   }
 
-  void checkVersion() async {
+  void prepare() async {
     int minVersion = await _bloc.getVersion();
     if (minVersion == 0) return;
     PackageInfo info = await PackageInfo.fromPlatform();
@@ -56,7 +59,27 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
 
-    Get.offAll(const HomePage());
+    List<Character>? chars = await _bloc.getCharacters();
+    if (chars == null) {
+      return;
+    }
+
+    if (chars.isEmpty) {
+      return; // to be implemented
+    }
+
+    int currentCharIndex = 0;
+    FlutterSecureStorage storage = const FlutterSecureStorage();
+    String? currentCharIndexString =
+        await storage.read(key: Common.currentCharacterIndex);
+    if (currentCharIndexString == null) {
+      await storage.write(key: Common.currentCharacterIndex, value: '0');
+    }
+
+    Shared shared = Get.put(Shared());
+    shared.currentCharacter = chars[currentCharIndex];
+
+    Get.offAll(() => const HomePage());
   }
 
   @override
