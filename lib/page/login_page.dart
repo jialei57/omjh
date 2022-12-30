@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:omjh/bloc/login_bloc.dart';
+import 'package:omjh/bloc/splash_bloc.dart';
 import 'package:omjh/common/theme_style.dart';
-import 'package:omjh/page/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -86,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                       _usernameController.text, _passwordController.text)
                   .then((token) => {
                         if (token != null && token.isNotEmpty)
-                          {Get.offAll(()=> const HomePage())}
+                          {Get.offAll(()=> SplashBloc())}
                       });
             }
           },

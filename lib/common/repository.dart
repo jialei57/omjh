@@ -4,12 +4,14 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:omjh/common/api_helper.dart';
 import 'package:omjh/common/common.dart';
+import 'package:omjh/common/shared.dart';
 import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/message.dart';
 import 'package:omjh/entity/spot.dart';
 
 class Repository {
   final ApiHelper _helper = ApiHelper();
+  final shared = Get.put(Shared());
   Future<int> getVersion() async {
     try {
       final jsonData = await _helper.get('mobile-app-version');
@@ -24,9 +26,9 @@ class Repository {
     return 0;
   }
 
-    Future<List<Spot>?> getMaps() async {
+    Future<List<Spot>?> getCurrentCityMaps() async {
     try {
-      final jsonData = await _helper.get('maps');
+      final jsonData = await _helper.get('maps/${shared.currentCharacter?.map}');
       if (jsonData == null) {
         return null;
       }

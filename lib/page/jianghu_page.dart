@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:omjh/page/chat_box.dart';
+import 'package:omjh/page/info_box.dart';
 
 class JiangHuPage extends StatelessWidget {
   const JiangHuPage({super.key});
@@ -7,9 +8,9 @@ class JiangHuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        Expanded(child: Container()),
-        const ChatBox()
+      children: const [
+        Expanded(child: InfoBox()),
+        ChatBox()
       ],
     );
   }

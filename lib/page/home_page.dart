@@ -16,8 +16,17 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: ThemeStyle.bgColor,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(30),
+        child: AppBar(
+          backgroundColor: ThemeStyle.bgColor,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 18),
+              child: Text('menu'.tr, style: ThemeStyle.textStyle.copyWith(fontSize: 16)),
+            )
+          ],
+        ),
       ),
       body: getBody(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
@@ -38,9 +47,10 @@ class _HomePageState extends State<HomePage> {
         selectedItemColor: ThemeStyle.selectedColor,
         unselectedItemColor: ThemeStyle.unselectedColor,
         selectedLabelStyle:
-            const TextStyle(fontFamily: 'NanFengXingShu', fontSize: 22),
+            // const TextStyle(fontFamily: 'AaYangGuanQu', fontSize: 22),
+            ThemeStyle.textStyle.copyWith(fontSize: 22, fontWeight: FontWeight.w600),
         unselectedLabelStyle:
-            const TextStyle(fontFamily: 'NanFengXingShu', fontSize: 18),
+            ThemeStyle.textStyle.copyWith(fontSize: 18),
         onTap: (index) => {
           setState(
             () => {_selectedIndex = index},

@@ -15,6 +15,8 @@ class AppTranslation extends Translations {
           'login': 'Loign',
           'submit': 'Submit',
           'input_dialog': 'Please input dialog',
+          'menu': 'Menu',
+          'there_are': 'There are: ',
         },
         'zh_CN': {
           'jianghu': '江湖',
@@ -28,6 +30,8 @@ class AppTranslation extends Translations {
           'login': '登录',
           'submit': '发送',
           'input_dialog': '请输入对话',
+          'menu': '菜单',
+          'there_are': '这里有: ',
         }
       };
 }

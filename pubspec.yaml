@@ -80,9 +80,9 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: NanFengXingShu
+    - family: xingkai
       fonts:
-        - asset: fonts/NanFengXingShu-2.ttf
+        - asset: fonts/AaBanRuoKaiShu-2.ttf
 
   #
   # For details regarding fonts from package dependencies,

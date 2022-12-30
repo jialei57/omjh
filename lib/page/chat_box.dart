@@ -23,7 +23,7 @@ class _ChatBoxState extends State<ChatBox> {
 
   Widget _buildSubmitButton() {
     return SizedBox(
-      height: 30,
+      height: 26,
       child: OutlinedButton(
           style: OutlinedButton.styleFrom(
               backgroundColor: ThemeStyle.bgColor,
@@ -38,7 +38,7 @@ class _ChatBoxState extends State<ChatBox> {
           },
           child: Text(
             'submit'.tr,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: ThemeStyle.textStyle.copyWith(color: Colors.white, fontSize: 16),
           )),
     );
   }
@@ -46,7 +46,7 @@ class _ChatBoxState extends State<ChatBox> {
   Widget _buildMessage(int index) {
     final message = _bloc.messages[index];
     String text = '[${message.charName}]: ${message.content}';
-    return Text(text, style: const TextStyle(fontSize: 14));
+    return Text(text, style: ThemeStyle.textStyle.copyWith(fontSize: 16));
   }
 
   @override
@@ -80,7 +80,13 @@ class _ChatBoxState extends State<ChatBox> {
               children: [
                 Expanded(
                     child: TextField(
-                  decoration: InputDecoration(hintText: 'input_dialog'.tr),
+                      style: ThemeStyle.textStyle.copyWith(fontSize: 16),
+                  decoration: InputDecoration(
+                      hintText: 'input_dialog'.tr,
+                      hintStyle: ThemeStyle.textStyle.copyWith(fontSize: 16),
+                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 5)),
                   controller: _messageControl,
                 )),
                 _buildSubmitButton()

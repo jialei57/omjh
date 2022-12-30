@@ -1,7 +1,7 @@
 class Character {
   final String name;
   final String sex;
-  final int map;
+  int map;
   final Map<String, dynamic>? status;
   final int userId;
 

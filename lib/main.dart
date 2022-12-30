@@ -7,6 +7,7 @@ import 'package:omjh/common/common.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:omjh/entity/character.dart';
+import 'package:omjh/entity/spot.dart';
 import 'package:omjh/page/home_page.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -78,6 +79,15 @@ class _SplashPageState extends State<SplashPage> {
 
     Shared shared = Get.put(Shared());
     shared.currentCharacter = chars[currentCharIndex];
+
+    List<Spot>? maps = await _bloc.getCurrentCityMaps();
+    if (maps == null || maps.isEmpty) {
+      return; // to be implemented
+    }
+
+    shared.currentMaps = maps;
+    shared.currentMap = maps.firstWhereOrNull(
+        (element) => element.id == shared.currentCharacter?.map);
 
     Get.offAll(() => const HomePage());
   }
