@@ -120,9 +120,10 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
         margin: const EdgeInsets.all(4.0),
         padding: const EdgeInsets.all(4.0),
         decoration: BoxDecoration(
-            border: Border.all(color: ThemeStyle.bgColor,width: 1.5),
+            border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
             borderRadius: const BorderRadius.all(Radius.circular(4))),
-        child: Text(shared.currentMap?.description ?? '', style: ThemeStyle.textStyle.copyWith(fontSize: 16)));
+        child: Text(shared.currentMap?.description ?? '',
+            style: ThemeStyle.textStyle.copyWith(fontSize: 16)));
   }
 
   Widget _buildPlayers() {
@@ -189,39 +190,51 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   }
 
   Spot? findLeftSpot() {
-    if (shared.currentMaps.isEmpty || shared.currentMap == null) {
+     if (shared.maps.isEmpty) {
       return null;
     }
-    return shared.currentMaps.firstWhereOrNull((element) =>
-        element.x == shared.currentMap!.x - 1 &&
-        element.y == shared.currentMap!.y);
+
+    if (shared.currentMap?.left == null) {
+      return null;
+    }
+
+    return shared.maps[shared.currentMap!.left!-1];
   }
 
   Spot? findRightSpot() {
-    if (shared.currentMaps.isEmpty || shared.currentMap == null) {
+    if (shared.maps.isEmpty) {
       return null;
     }
-    return shared.currentMaps.firstWhereOrNull((element) =>
-        element.x == shared.currentMap!.x + 1 &&
-        element.y == shared.currentMap!.y);
+
+    if (shared.currentMap?.right == null) {
+      return null;
+    }
+
+    return shared.maps[shared.currentMap!.right!-1];
   }
 
   Spot? findTopSpot() {
-    if (shared.currentMaps.isEmpty || shared.currentMap == null) {
+    if (shared.maps.isEmpty) {
       return null;
     }
-    return shared.currentMaps.firstWhereOrNull((element) =>
-        element.x == shared.currentMap!.x &&
-        element.y == shared.currentMap!.y + 1);
+
+    if (shared.currentMap?.top == null) {
+      return null;
+    }
+
+    return shared.maps[shared.currentMap!.top!-1];
   }
 
   Spot? findBottomSpot() {
-    if (shared.currentMaps.isEmpty || shared.currentMap == null) {
+    if (shared.maps.isEmpty) {
       return null;
     }
-    return shared.currentMaps.firstWhereOrNull((element) =>
-        element.x == shared.currentMap!.x &&
-        element.y == shared.currentMap!.y - 1);
+
+    if (shared.currentMap?.bottom == null) {
+      return null;
+    }
+
+    return shared.maps[shared.currentMap!.bottom!-1];
   }
 
   Widget _buildControlBox() {

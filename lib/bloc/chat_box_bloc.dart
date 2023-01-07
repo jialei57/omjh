@@ -1,8 +1,10 @@
 // ignore_for_file: avoid_print
 
 import 'package:action_cable/action_cable.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:omjh/bloc/bloc.dart';
 import 'package:get/get.dart';
+import 'package:omjh/common/common.dart';
 import 'package:omjh/common/repository.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/entity/character.dart';
@@ -27,17 +29,23 @@ class ChatBoxBloc implements Bloc {
     _repository.sendMessage(message);
   }
 
-  void connectToCable() {
-    cable = ActionCable.Connect("ws://127.0.0.1:3000/cable", headers: {
-      "Authorization": "Some Token",
-    }, onConnected: () {
-      print("connected");
-      subscribe();
-    }, onConnectionLost: () {
-      print("connection lost");
-    }, onCannotConnect: () {
-      print("cannot connect");
-    });
+  void connectToCable() async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: Common.authendicationToken);
+    try {
+      cable = ActionCable.Connect("ws://127.0.0.1:3000/cable", headers: {
+        "Authorization": token ?? '',
+      }, onConnected: () {
+        print("connected");
+        subscribe();
+      }, onConnectionLost: () {
+        print("connection lost");
+      }, onCannotConnect: () {
+        print("cannot connect");
+      });
+    } catch (e) {
+      print('cannot connect: $e');
+    }
   }
 
   void subscribe() {

@@ -3,7 +3,7 @@ class Character {
   final String sex;
   int map;
   final Map<String, dynamic>? status;
-  final int userId;
+  final int? userId;
 
   Character(this.name, this.sex, this.map, this.status, this.userId);
 

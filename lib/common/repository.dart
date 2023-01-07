@@ -7,7 +7,7 @@ import 'package:omjh/common/common.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/message.dart';
-import 'package:omjh/entity/spot.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Repository {
   final ApiHelper _helper = ApiHelper();
@@ -26,21 +26,31 @@ class Repository {
     return 0;
   }
 
-    Future<List<Spot>?> getCurrentCityMaps() async {
+  Future<bool> getMapFile() async {
     try {
-      final jsonData = await _helper.get('maps/${shared.currentCharacter?.map}');
-      if (jsonData == null) {
-        return null;
+      final Directory appDocumentsDirectory =
+          await getApplicationDocumentsDirectory(); // 1
+      final String appDocumentsPath = appDocumentsDirectory.path;
+      final String filePath = '$appDocumentsPath/map.csv';
+
+      final File file = File(filePath);
+      final bool exist = await file.exists();
+
+      if (exist) {
+        return true;
       }
 
-      List<Spot> maps =
-          (jsonData as List).map((i) => Spot.fromJson(i)).toList();
-
-      return maps;
+      final String content = await _helper.get('map', contentType: 'text/csv');
+      File newFile = await file.create();
+      await newFile.writeAsString(content);
+      return true;
     } on SocketException {
       Get.rawSnackbar(message: 'Connection Failed');
+    } on IOException {
+      Get.rawSnackbar(message: 'Failed to save map file.');
     }
-    return null;
+
+    return false;
   }
 
   Future<List<Character>?> getCharacters() async {
@@ -67,6 +77,20 @@ class Repository {
       Get.rawSnackbar(message: 'Connection Failed');
     }
     return null;
+  }
+
+  Future<bool> createCharacter(Character char) async {
+    try {
+      dynamic json = await _helper.post('characters', jsonEncode(char));
+
+      if (json == null) {
+        return false;
+      }
+      return true;
+    } on SocketException {
+      Get.rawSnackbar(message: 'Connection Failed');
+    }
+    return false;
   }
 
   Future<String?> authenticate(String username, String password) async {

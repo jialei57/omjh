@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:omjh/bloc/bloc.dart';
 import 'package:omjh/common/repository.dart';
 import 'package:omjh/entity/character.dart';
-import 'package:omjh/entity/spot.dart';
 
 class SplashBloc implements Bloc {
   final Repository _repository = Get.put(Repository());
@@ -15,8 +14,8 @@ class SplashBloc implements Bloc {
     return await _repository.getCharacters();
   }
 
-    Future<List<Spot>?> getCurrentCityMaps() async {
-    return await _repository.getCurrentCityMaps();
+  Future<bool> getMap() async {
+    return await _repository.getMapFile();
   }
   
   @override

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:omjh/bloc/splash_bloc.dart';
 import 'package:omjh/common/app_translation.dart';
-import 'package:omjh/common/common.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:omjh/entity/character.dart';
-import 'package:omjh/entity/spot.dart';
+import 'package:omjh/page/character_creation_page.dart';
 import 'package:omjh/page/home_page.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -60,34 +58,27 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
 
+    bool mapDownloaded = await _bloc.getMap();
+    if (!mapDownloaded) {
+      Get.rawSnackbar(message: 'Download map failed.');
+      return;
+    }
+
+    Shared shared = Get.put(Shared());
+    await shared.loadMap();
+
     List<Character>? chars = await _bloc.getCharacters();
     if (chars == null) {
       return;
     }
 
     if (chars.isEmpty) {
-      return; // to be implemented
+      Get.offAll(() => const CharacterCreationPage());
+      return;
     }
 
-    int currentCharIndex = 0;
-    FlutterSecureStorage storage = const FlutterSecureStorage();
-    String? currentCharIndexString =
-        await storage.read(key: Common.currentCharacterIndex);
-    if (currentCharIndexString == null) {
-      await storage.write(key: Common.currentCharacterIndex, value: '0');
-    }
-
-    Shared shared = Get.put(Shared());
-    shared.currentCharacter = chars[currentCharIndex];
-
-    List<Spot>? maps = await _bloc.getCurrentCityMaps();
-    if (maps == null || maps.isEmpty) {
-      return; // to be implemented
-    }
-
-    shared.currentMaps = maps;
-    shared.currentMap = maps.firstWhereOrNull(
-        (element) => element.id == shared.currentCharacter?.map);
+    shared.characters = chars;
+    shared.init();
 
     Get.offAll(() => const HomePage());
   }

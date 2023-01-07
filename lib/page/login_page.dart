@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:omjh/bloc/login_bloc.dart';
-import 'package:omjh/bloc/splash_bloc.dart';
 import 'package:omjh/common/theme_style.dart';
+import 'package:omjh/main.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -69,6 +69,14 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  void login() async {
+    final token = await _bloc.authendicate(
+        _usernameController.text, _passwordController.text);
+    if (token != null && token.isNotEmpty) {
+      Get.offAll(() => const SplashPage());
+    }
+  }
+
   Widget _buildLoginButton() {
     return Container(
       margin: const EdgeInsets.only(top: 30, bottom: 50),
@@ -81,13 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                   borderRadius: BorderRadius.circular(18))),
           onPressed: () {
             if (validate()) {
-              _bloc
-                  .authendicate(
-                      _usernameController.text, _passwordController.text)
-                  .then((token) => {
-                        if (token != null && token.isNotEmpty)
-                          {Get.offAll(()=> SplashBloc())}
-                      });
+              login();
             }
           },
           child: Text(
