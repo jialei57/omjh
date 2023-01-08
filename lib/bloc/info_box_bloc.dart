@@ -14,6 +14,10 @@ class InfoBoxBloc implements Bloc {
 
   Future updateCharacter() async {
     final Character char = shared.currentCharacter!;
-    players = await _repository.updateCharacter(char);
+    players.clear();
+    final all = await _repository.updateCharacter(char);
+    if (all.isNotEmpty) {
+      players.addAll(all);
+    }
   }
 }

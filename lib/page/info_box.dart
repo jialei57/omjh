@@ -33,6 +33,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _bloc.updateCharacter();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: this,
@@ -139,23 +140,25 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
       child: Obx(() => ListView.builder(
           itemCount: _bloc.players.length,
           itemBuilder: ((context, index) {
-            return _builderPlayer(index);
+            return _buildPlayer(index);
           }))),
     );
   }
 
-  Widget _builderPlayer(int index) {
+  Widget _buildPlayer(int index) {
     final Character player = _bloc.players[index];
     return Container(
-        width: spotWidth,
+        width: double.infinity,
         height: spotHeight,
+        margin: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: ThemeStyle.bgColor, width: 2)),
+            color: const Color.fromARGB(255, 218, 215, 215),
+            border: Border.all(color: ThemeStyle.bgColor, width: 2),
+            borderRadius: const BorderRadius.all(Radius.circular(12))),
         child: Center(
           child: Text(player.name,
               style: ThemeStyle.textStyle
-                  .copyWith(fontSize: 16, color: Colors.white)),
+                  .copyWith(fontSize: 16, color: Colors.black)),
         ));
   }
 

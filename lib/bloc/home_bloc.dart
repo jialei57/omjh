@@ -13,7 +13,6 @@ class HomeBloc extends Bloc {
   void dispose() {}
 
   void heartBeat() {
-    _repository.updateCharacter(shared.currentCharacter!);
     Timer.periodic(const Duration(minutes: 3), (timer) {
       _repository.updateCharacter(shared.currentCharacter!);
     });
