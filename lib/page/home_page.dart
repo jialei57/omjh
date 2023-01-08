@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:omjh/bloc/home_bloc.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:get/get.dart';
@@ -16,6 +17,13 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   final menuItemHeight = 36.0;
   final menuItemWidth = 120.0;
+  final HomeBloc _bloc = HomeBloc();
+
+  @override
+  void initState() {
+    _bloc.heartBeat();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

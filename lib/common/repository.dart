@@ -81,10 +81,17 @@ class Repository {
 
   Future<List<Character>> updateCharacter(Character char) async {
     try {
-      final result =
+      final jsonData =
           await _helper.put('characters/${char.id!}', jsonEncode(char));
-  
-      return result;
+
+      if (jsonData == null) {
+        return [];
+      }
+
+      List<Character> players =
+          (jsonData as List).map((i) => Character.fromJson(i)).toList();
+
+      return players;
     } on SocketException {
       Get.rawSnackbar(message: 'Connection Failed');
     }
