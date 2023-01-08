@@ -33,7 +33,7 @@ class ChatBoxBloc implements Bloc {
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: Common.authendicationToken);
     try {
-      cable = ActionCable.Connect("ws://127.0.0.1:3000/cable", headers: {
+      cable = ActionCable.Connect("ws://${Common.baseIP}/cable", headers: {
         "Authorization": token ?? '',
       }, onConnected: () {
         print("connected");

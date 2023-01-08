@@ -8,9 +8,11 @@ import 'dart:async';
 import 'package:omjh/page/login_page.dart';
 
 class ApiHelper {
-  // final String _baseUrl = 'http://127.0.0.1:3000/';
-  final String _baseUrl = 'http://101.127.158.77:3000/';
   Map<String, String> headers = {};
+
+  String getBaseURL() {
+    return 'http://${Common.baseIP}/';
+  }
 
   Future prepareHeaders({String contentType = 'application/json'}) async {
     headers[HttpHeaders.contentTypeHeader] = contentType;
@@ -23,7 +25,7 @@ class ApiHelper {
       {String contentType = 'application/json'}) async {
     await prepareHeaders(contentType: contentType);
     final response = await http.get(
-      Uri.parse(_baseUrl + url),
+      Uri.parse(getBaseURL()  + url),
       headers: headers,
     );
     return _returnResponse(response);
@@ -31,18 +33,17 @@ class ApiHelper {
 
   Future<dynamic> post(String url, dynamic body) async {
     await prepareHeaders();
-    final response = await http.post(Uri.parse(_baseUrl + url),
+    final response = await http.post(Uri.parse(getBaseURL()  + url),
         headers: headers, body: body);
     return _returnResponse(response);
   }
 
   Future<dynamic> put(String url, dynamic body) async {
     await prepareHeaders();
-    final response = await http.put(Uri.parse(_baseUrl + url),
+    final response = await http.put(Uri.parse(getBaseURL()  + url),
         headers: headers, body: body);
     return _returnResponse(response);
   }
-
 
   dynamic _returnResponse(http.Response response) {
     switch (response.statusCode) {
@@ -50,14 +51,16 @@ class ApiHelper {
       case 201:
         final String? responseContentType =
             response.request?.headers[HttpHeaders.contentTypeHeader];
-        if (responseContentType != null && responseContentType.contains('application/json')) {
+        if (responseContentType != null &&
+            responseContentType.contains('application/json')) {
           var responseJson = json.decode(response.body.toString());
           return responseJson;
         }
 
         return response.body.toString();
       case 401:
-        if (response.request?.url.toString() == '${_baseUrl}authenticate') {
+        if (response.request?.url.toString() ==
+            '${getBaseURL() }authenticate') {
           Get.rawSnackbar(message: 'Wrong user name or password.');
           return null;
         }
