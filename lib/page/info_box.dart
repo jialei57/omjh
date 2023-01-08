@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:omjh/bloc/info_box_bloc.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:get/get.dart';
+import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/spot.dart';
 
 enum MoveDirection { up, down, left, right, none }
@@ -14,6 +16,7 @@ class InfoBox extends StatefulWidget {
 }
 
 class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
+  final InfoBoxBloc _bloc = InfoBoxBloc();
   final spotWidth = 90.0;
   final spotHeight = 30.0;
   final spotVerticalPadding = 10;
@@ -133,8 +136,27 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
       decoration: const BoxDecoration(
           border:
               Border(left: BorderSide(width: 1.5, color: ThemeStyle.bgColor))),
-      child: const SizedBox.shrink(),
+      child: Obx(() => ListView.builder(
+          itemCount: _bloc.players.length,
+          itemBuilder: ((context, index) {
+            return _builderPlayer(index);
+          }))),
     );
+  }
+
+  Widget _builderPlayer(int index) {
+    final Character player = _bloc.players[index];
+    return Container(
+        width: spotWidth,
+        height: spotHeight,
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: ThemeStyle.bgColor, width: 2)),
+        child: Center(
+          child: Text(player.name,
+              style: ThemeStyle.textStyle
+                  .copyWith(fontSize: 16, color: Colors.white)),
+        ));
   }
 
   Widget _buildNPCs() {
@@ -165,6 +187,12 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
           if (!isCurrent) {
             shared.currentCharacter!.map = spot.id;
 
+            Future.delayed(const Duration(milliseconds: 1500), () {
+              if (shared.currentCharacter!.map == spot.id) {
+                _bloc.updateCharacter();
+              }
+            });
+
             _animationController.forward(from: 0.1);
             nextSpot = spot;
             moveDirection = direction;
@@ -190,7 +218,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   }
 
   Spot? findLeftSpot() {
-     if (shared.maps.isEmpty) {
+    if (shared.maps.isEmpty) {
       return null;
     }
 
@@ -198,7 +226,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
       return null;
     }
 
-    return shared.maps[shared.currentMap!.left!-1];
+    return shared.maps[shared.currentMap!.left! - 1];
   }
 
   Spot? findRightSpot() {
@@ -210,7 +238,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
       return null;
     }
 
-    return shared.maps[shared.currentMap!.right!-1];
+    return shared.maps[shared.currentMap!.right! - 1];
   }
 
   Spot? findTopSpot() {
@@ -222,7 +250,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
       return null;
     }
 
-    return shared.maps[shared.currentMap!.top!-1];
+    return shared.maps[shared.currentMap!.top! - 1];
   }
 
   Spot? findBottomSpot() {
@@ -234,7 +262,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
       return null;
     }
 
-    return shared.maps[shared.currentMap!.bottom!-1];
+    return shared.maps[shared.currentMap!.bottom! - 1];
   }
 
   Widget _buildControlBox() {

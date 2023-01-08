@@ -15,7 +15,7 @@ class CharacterCreationBloc extends Bloc {
   Future<bool> createCharacter() async {
     Map<String, dynamic> status = {};
     status['age'] = 14;
-    Character char = Character(name, sex, 1, status, null);
+    Character char = Character(null, name, sex, 1, status, null);
     bool success = await _repository.createCharacter(char);
     if (!success) {
       return false;

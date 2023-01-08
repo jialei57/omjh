@@ -36,6 +36,14 @@ class ApiHelper {
     return _returnResponse(response);
   }
 
+  Future<dynamic> put(String url, dynamic body) async {
+    await prepareHeaders();
+    final response = await http.put(Uri.parse(_baseUrl + url),
+        headers: headers, body: body);
+    return _returnResponse(response);
+  }
+
+
   dynamic _returnResponse(http.Response response) {
     switch (response.statusCode) {
       case 200:

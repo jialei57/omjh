@@ -76,7 +76,19 @@ class Repository {
     } on SocketException {
       Get.rawSnackbar(message: 'Connection Failed');
     }
-    return null;
+    return;
+  }
+
+  Future<List<Character>> updateCharacter(Character char) async {
+    try {
+      final result =
+          await _helper.put('characters/${char.id!}', jsonEncode(char));
+  
+      return result;
+    } on SocketException {
+      Get.rawSnackbar(message: 'Connection Failed');
+    }
+    return [];
   }
 
   Future<bool> createCharacter(Character char) async {
