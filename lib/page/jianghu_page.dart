@@ -7,11 +7,11 @@ class JiangHuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        Expanded(child: InfoBox()),
-        ChatBox()
-      ],
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: const [Expanded(child: InfoBox()), ChatBox()],
+      ),
     );
   }
 }

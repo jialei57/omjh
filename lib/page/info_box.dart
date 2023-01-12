@@ -4,6 +4,8 @@ import 'package:omjh/common/shared.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:get/get.dart';
 import 'package:omjh/entity/character.dart';
+import 'package:omjh/entity/interactable.dart';
+import 'package:omjh/entity/npc.dart';
 import 'package:omjh/entity/spot.dart';
 
 enum MoveDirection { up, down, left, right, none }
@@ -18,6 +20,7 @@ class InfoBox extends StatefulWidget {
 class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   final InfoBoxBloc _bloc = InfoBoxBloc();
   final spotWidth = 90.0;
+  final npcWidth = 80.0;
   final spotHeight = 30.0;
   final spotVerticalPadding = 10;
   final spotHorizontalPadding = 20;
@@ -29,11 +32,12 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   late Animation<Offset> _offsetAnimation;
   var moveDirection = MoveDirection.none;
   Spot? nextSpot;
+  Interactable? _selectedObject;
 
   @override
   void initState() {
     super.initState();
-    _bloc.updateCharacter();
+    _bloc.lookAtMap();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: this,
@@ -106,14 +110,39 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
             child: Row(
           children: [
             Expanded(
-                child: Column(
-              children: [_buildInfo()],
+                child: Stack(
+              children: [
+                Column(
+                  children: [_buildInfo()],
+                ),
+                _selectedObject != null
+                    ? _buildInteractionBox()
+                    : const SizedBox.shrink()
+              ],
             )),
             _buildPlayers()
           ],
         )),
         Column(children: [_buildControlBox(), _buildNPCs()])
       ],
+    );
+  }
+
+  Widget _buildInteractionBox() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      margin: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
+          borderRadius: const BorderRadius.all(Radius.circular(8))),
+      child: Column(children: [
+        Row(children: [
+          Text((_selectedObject as Npc).name,
+            style: ThemeStyle.textStyle.copyWith(fontSize: 16))
+        ],)
+      ]),
     );
   }
 
@@ -125,7 +154,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
         padding: const EdgeInsets.all(4.0),
         decoration: BoxDecoration(
             border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
-            borderRadius: const BorderRadius.all(Radius.circular(4))),
+            borderRadius: const BorderRadius.all(Radius.circular(8))),
         child: Text(shared.currentMap?.description ?? '',
             style: ThemeStyle.textStyle.copyWith(fontSize: 16)));
   }
@@ -162,16 +191,45 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
         ));
   }
 
+  Widget _buildNpc(int index) {
+    if (index >= _bloc.npcs.length) {
+      return const SizedBox.shrink();
+    }
+    final Npc npc = _bloc.npcs[index];
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedObject = npc;
+        });
+      },
+      child: Container(
+          width: npcWidth,
+          height: spotHeight,
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 218, 215, 215),
+              border: Border.all(color: ThemeStyle.bgColor, width: 2),
+              borderRadius: const BorderRadius.all(Radius.circular(12))),
+          child: Center(
+            child: Text(npc.name,
+                style: ThemeStyle.textStyle
+                    .copyWith(fontSize: 16, color: Colors.black)),
+          )),
+    );
+  }
+
   Widget _buildNPCs() {
     return SizedBox(
-      height: 36,
+      height: 46,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+        padding: const EdgeInsets.fromLTRB(10, 2, 10, 4),
         child: Row(
           children: [
             Text('there_are'.tr,
                 style: ThemeStyle.textStyle.copyWith(fontSize: 16)),
-            // _buildSpot()
+            Obx(() => _buildNpc(0)),
+            Obx(() => _buildNpc(1)),
+            Obx(() => _buildNpc(2))
           ],
         ),
       ),
@@ -188,11 +246,16 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
       child: GestureDetector(
         onTap: () {
           if (!isCurrent) {
-            shared.currentCharacter!.map = spot.id;
+            if (_selectedObject != null) {
+              setState(() {
+                _selectedObject = null;
+              });
+            }
+            _bloc.moveToMap(spot.id);
 
             Future.delayed(const Duration(milliseconds: 1500), () {
               if (shared.currentCharacter!.map == spot.id) {
-                _bloc.updateCharacter();
+                _bloc.lookAtMap();
               }
             });
 

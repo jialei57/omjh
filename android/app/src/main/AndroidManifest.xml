@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.jialei.omjh">
    <application
-        android:label="独行江湖"
+        android:label="问逍遥"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

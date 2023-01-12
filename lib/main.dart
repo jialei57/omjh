@@ -78,7 +78,7 @@ class _SplashPageState extends State<SplashPage> {
     }
 
     shared.characters = chars;
-    shared.init();
+    await shared.init();
 
     Get.offAll(() => const HomePage());
   }

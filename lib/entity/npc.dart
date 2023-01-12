@@ -1,29 +1,26 @@
 import 'package:omjh/entity/interactable.dart';
 
-class Character implements Interactable{
+class Npc implements Interactable {
   final int? id;
   final String name;
-  final String sex;
-  int map;
+  int? map;
   final Map<String, dynamic>? status;
-  final int? userId;
+  final Map<String, dynamic>? info;
 
-  Character(this.id, this.name, this.sex, this.map, this.status, this.userId);
+  Npc(this.id, this.name, this.map, this.status, this.info);
 
-  Character.fromJson(Map<String, dynamic> json)
+  Npc.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         name = json['name'],
-        sex = json['sex'],
         map = json['map'],
         status = json['status'],
-        userId = json['user_id'];
+        info = json['info'];
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
-        'sex': sex,
         'map': map,
         'status': status,
-        'user_id': userId
+        'info': info
       };
 }

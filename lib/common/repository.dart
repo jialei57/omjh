@@ -70,32 +70,23 @@ class Repository {
     return null;
   }
 
-  Future sendMessage(Message message) async {
+  // Future sendMessage(Message message) async {
+  //   try {
+  //     await _helper.post('messages', jsonEncode(message));
+  //   } on SocketException {
+  //     Get.rawSnackbar(message: 'Connection Failed');
+  //   }
+  //   return;
+  // }
+
+  Future<dynamic> updateCharacter(Character char) async {
     try {
-      await _helper.post('messages', jsonEncode(message));
+      return await _helper.put('characters/${char.id!}', jsonEncode(char));
+
     } on SocketException {
       Get.rawSnackbar(message: 'Connection Failed');
     }
-    return;
-  }
-
-  Future<List<Character>> updateCharacter(Character char) async {
-    try {
-      final jsonData =
-          await _helper.put('characters/${char.id!}', jsonEncode(char));
-
-      if (jsonData == null) {
-        return [];
-      }
-
-      List<Character> players =
-          (jsonData as List).map((i) => Character.fromJson(i)).toList();
-
-      return players;
-    } on SocketException {
-      Get.rawSnackbar(message: 'Connection Failed');
-    }
-    return [];
+    return null;
   }
 
   Future<bool> createCharacter(Character char) async {

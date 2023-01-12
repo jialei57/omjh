@@ -26,6 +26,7 @@ class AppTranslation extends Translations {
           'name_not_allowed': 'This name is not allowed.',
           'your_journey_begins': 'Your journey starts.',
           'start': 'Start',
+          'register_new':'No account yet? Click here to register.',
         },
         'zh_CN': {
           'jianghu': '江湖',
@@ -48,8 +49,9 @@ class AppTranslation extends Translations {
           'girl': '女孩',
           'name_too_short': '该姓名太短.',
           'name_not_allowed': '该姓名不被允许.',
-          'your_journey_begins': '你的江湖旅程开始了.',
+          'your_journey_begins': '你的旅途开始了.',
           'start': '开始',
+          'register_new':'没有账号? 点击这里创建',
 
         }
       };

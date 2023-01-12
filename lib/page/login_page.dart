@@ -118,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
               ]),
             ),
             _buildLoginButton(),
-            const Text('New User? Create Account')
+            Text('register_new'.tr)
           ],
         ),
       ),
