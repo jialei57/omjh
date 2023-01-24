@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:get/get.dart';
+import 'package:omjh/page/character_page.dart';
 import 'package:omjh/page/jianghu_page.dart';
 import 'package:omjh/page/login_page.dart';
 
@@ -62,6 +63,8 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.home), label: 'bag'.tr),
           BottomNavigationBarItem(
               icon: const Icon(Icons.home), label: 'skill'.tr),
+          BottomNavigationBarItem(
+              icon: const Icon(Icons.home), label: 'quests'.tr),
         ],
         selectedIconTheme: const IconThemeData(opacity: 0.0, size: 0),
         unselectedIconTheme: const IconThemeData(opacity: 0.0, size: 0),
@@ -85,6 +88,8 @@ class _HomePageState extends State<HomePage> {
     switch (index) {
       case 0:
         return const JiangHuPage();
+      case 1:
+        return CharacterPage();
       default:
         return const Text('Test');
     }

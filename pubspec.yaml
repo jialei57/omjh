@@ -45,6 +45,7 @@ dependencies:
   path_provider: ^2.0.11
   md5_file_checksum: ^1.0.4
   csv: ^5.0.1
+  flutter_custom_clippers: ^2.1.0
 
 dev_dependencies:
   flutter_test:

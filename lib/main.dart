@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:omjh/bloc/splash_bloc.dart';
@@ -41,6 +43,10 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage> {
   final SplashBloc _bloc = SplashBloc();
+  double _step = 0;
+  final _maxSteps = 3.0;
+  final _iconSize = 40.0;
+  final _progressPadding = 40.0;
 
   @override
   void initState() {
@@ -58,6 +64,11 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
 
+    sleep(const Duration(milliseconds: 500));
+    setState(() {
+      _step++;
+    });
+
     bool mapDownloaded = await _bloc.getMap();
     if (!mapDownloaded) {
       Get.rawSnackbar(message: 'Download map failed.');
@@ -67,10 +78,20 @@ class _SplashPageState extends State<SplashPage> {
     Shared shared = Get.put(Shared());
     await shared.loadMap();
 
+    sleep(const Duration(milliseconds: 500));
+    setState(() {
+      _step++;
+    });
+
     List<Character>? chars = await _bloc.getCharacters();
     if (chars == null) {
       return;
     }
+
+    sleep(const Duration(milliseconds:500));
+    setState(() {
+      _step++;
+    });
 
     if (chars.isEmpty) {
       Get.offAll(() => const CharacterCreationPage());
@@ -93,9 +114,33 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Container(
-            decoration: const BoxDecoration(
-      color: Colors.white,
-      image: DecorationImage(image: AssetImage('assets/image/ic_splash.png')),
-    )));
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        image: DecorationImage(image: AssetImage('assets/image/ic_splash.png')),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Spacer(),
+        LayoutBuilder(builder: (context, constrains) {
+          var leftPadding =
+              (constrains.maxWidth - 2*_progressPadding) * _step / _maxSteps + _iconSize / 2;
+          return Padding(
+              padding: EdgeInsets.only(left: leftPadding),
+              child: Image(
+                image:
+                    const AssetImage('assets/image/ic_progress_indicator.png'),
+                width: _iconSize,
+                height: _iconSize,
+              ));
+        }),
+        Padding(
+          padding: EdgeInsets.fromLTRB(_progressPadding, 0, _progressPadding, 100),
+          child: LinearProgressIndicator(
+              value: _step / _maxSteps,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.black),
+              backgroundColor: Colors.grey,
+              minHeight: 10),
+        ),
+      ]),
+    ));
   }
 }

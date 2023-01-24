@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:get/get.dart';
 import 'package:omjh/bloc/bloc.dart';
@@ -14,6 +13,8 @@ class InfoBoxBloc implements Bloc {
   List<Character> players = <Character>[].obs;
   List<Npc> npcs = <Npc>[].obs;
   final actionCableHelper = Get.put(ActionCableHelper());
+  List<String> infoMessages = <String>[].obs;
+  final infoMessageCount = 30;
 
   @override
   void dispose() {}
@@ -25,17 +26,32 @@ class InfoBoxBloc implements Bloc {
         'Map', {'id': char.map, 'charId': char.id}, onMessage);
   }
 
+  void addInfoMessage(String msg) {
+    if (msg.isEmpty) {
+      return;
+    }
+    infoMessages.insert(0, msg);
+    if (infoMessages.length > infoMessageCount) {
+      infoMessages.removeRange(infoMessageCount, infoMessages.length);
+    }
+  }
+
   void moveToMap(int mapId) {
     players.clear();
     npcs.clear();
-
-    actionCableHelper
-        .unsubscribeFromChannel('Map', {'id': shared.currentCharacter!.map});
     shared.currentCharacter!.map = mapId;
+    Future.delayed(const Duration(milliseconds: 500), () {
+      actionCableHelper.usunsubscribeAllOldMapChanels(mapId);
+    });
   }
 
   void onMessage(Map msg) {
-    final action = msg['action'] as String;
+    final action = msg['action'] as String?;
+    final map = msg['map'] as int?;
+
+    if (map != shared.currentCharacter!.map) {
+      return;
+    }
 
     if (action == 'enter') {
       final allPlayers = (json.decode(msg['players']) as List)

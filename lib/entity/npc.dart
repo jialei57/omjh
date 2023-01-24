@@ -6,6 +6,7 @@ class Npc implements Interactable {
   int? map;
   final Map<String, dynamic>? status;
   final Map<String, dynamic>? info;
+  int _dialogIndex = 0;
 
   Npc(this.id, this.name, this.map, this.status, this.info);
 
@@ -16,11 +17,43 @@ class Npc implements Interactable {
         status = json['status'],
         info = json['info'];
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'map': map,
-        'status': status,
-        'info': info
-      };
+  Map<String, dynamic> toJson() =>
+      {'id': id, 'name': name, 'map': map, 'status': status, 'info': info};
+
+  @override
+  String getDescription() {
+    if (info == null) {
+      return '';
+    }
+
+    return info!['description'];
+  }
+
+  @override
+  List<String> getActions() {
+    if (info == null) {
+      return [];
+    }
+    return (info?['actions'] as List?)?.map((e) => e as String).toList() ?? [];
+  }
+
+  String getNextDialog() {
+    if (info == null || info?['dialogs'] == null) {
+      return '';
+    }
+
+    List<String> dialogs =
+        (info?['dialogs'] as List?)?.map((e) => e as String).toList() ?? [];
+    if (dialogs.isEmpty) {
+      return '';
+    }
+
+    String dialog = dialogs[_dialogIndex];
+    _dialogIndex++;
+    if (_dialogIndex >= dialogs.length) {
+      _dialogIndex = 0;
+    }
+
+    return dialog;
+  }
 }

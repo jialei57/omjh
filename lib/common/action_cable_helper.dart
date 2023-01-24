@@ -79,15 +79,13 @@ class ActionCableHelper {
 
   void subscribeToChannel(
       String channel, Map<String, dynamic>? params, Function onMessage) {
-    cable.subscribe(channel,
-        channelParams: params,
-        onSubscribed: () {
-          print('subscribed to $channel: ${params?.toString()}');
-        },
-        onDisconnected: () {},
-        onMessage: (Map message) {
-          onMessage(message);
-        });
+    cable.subscribe(channel, channelParams: params, onSubscribed: () {
+      print('subscribed to $channel: ${params?.toString()}');
+    }, onDisconnected: () {
+      print('cannot subscibe');
+    }, onMessage: (Map message) {
+      onMessage(message);
+    });
   }
 
   void unsubscribeFromChannel(String channel, Map<String, dynamic>? params) {
@@ -95,17 +93,36 @@ class ActionCableHelper {
     if (params != null) {
       channleId = '${channel}_${params['id']}';
     }
-    subscribers.removeWhere((key, value) => key == channleId);
-    cable.unsubscribe(channel, channelParams: params);
-    print('unsubscribed from $channel: ${params?.toString()}');
+    if (subscribers.containsKey(channleId)) {
+      var subscriber = subscribers[channleId];
+      cable.unsubscribe(channel, channelParams: subscriber?.params);
+      subscribers.removeWhere((key, value) => key == channleId);
+      print('unsubscribed from $channel: ${params?.toString()}');
+    }
+  }
+
+  void usunsubscribeAllOldMapChanels(int currentMap) {
+    final channleId = 'Map_$currentMap';
+    subscribers.keys
+        .where((key) => key.startsWith('Map') && key != channleId)
+        .toList()
+        .forEach((k) {
+      var subscriber = subscribers[k];
+      cable.unsubscribe(subscriber!.channel, channelParams: subscriber.params);
+      subscribers.remove(k);
+      print('unsubscribed from ${subscriber.channel}: ${subscriber.params?.toString()}');
+    });
   }
 
   void sendMessage(String charName, int mapId, String content) {
     if (status == ActionCableStatus.connected) {
-      cable.performAction('Message',
-          action: 'send_message',
-          channelParams: {'id': mapId},
-          actionParams: {'char_name': charName, 'map': mapId, 'content': content});
+      cable.performAction('Message', action: 'send_message', channelParams: {
+        'id': mapId
+      }, actionParams: {
+        'char_name': charName,
+        'map': mapId,
+        'content': content
+      });
     } else {
       Get.rawSnackbar(message: 'Connot send now');
     }

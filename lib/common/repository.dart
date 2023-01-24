@@ -6,7 +6,6 @@ import 'package:omjh/common/api_helper.dart';
 import 'package:omjh/common/common.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/entity/character.dart';
-import 'package:omjh/entity/message.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Repository {

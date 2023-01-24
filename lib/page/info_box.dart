@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:omjh/bloc/info_box_bloc.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/common/theme_style.dart';
@@ -24,7 +25,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   final spotHeight = 30.0;
   final spotVerticalPadding = 10;
   final spotHorizontalPadding = 20;
-  final boxHeight = 130.0;
+  final boxHeight = 140.0;
   var controlLeftPadding = 0.0;
   var controlTopPadding = 0.0;
   final shared = Get.put(Shared());
@@ -33,6 +34,8 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   var moveDirection = MoveDirection.none;
   Spot? nextSpot;
   Interactable? _selectedObject;
+  Tween<Offset> offset =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(0.0, 0.0));
 
   @override
   void initState() {
@@ -51,37 +54,30 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
         });
       }
     });
-    setAnimation();
+  
+    _offsetAnimation = offset.animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.fastOutSlowIn,
+    ));
   }
 
   void setAnimation() {
-    Tween<Offset> offset =
-        Tween<Offset>(begin: Offset.zero, end: const Offset(0.0, 0.0));
-
     switch (moveDirection) {
       case MoveDirection.up:
-        offset = Tween<Offset>(
-          begin: Offset.zero,
-          end: const Offset(0.0, -0.3),
-        );
+        offset.begin =  Offset.zero;
+        offset.end =  const Offset(0.0, -0.5);
         break;
       case MoveDirection.down:
-        offset = Tween<Offset>(
-          begin: Offset.zero,
-          end: const Offset(0.0, 0.3),
-        );
+        offset.begin =  Offset.zero;
+        offset.end =  const Offset(0.0, 0.5);
         break;
       case MoveDirection.left:
-        offset = Tween<Offset>(
-          begin: Offset.zero,
-          end: const Offset(-1.0, 0.0),
-        );
+        offset.begin =  Offset.zero;
+        offset.end =  const Offset(-1.0, 0.0);
         break;
       case MoveDirection.right:
-        offset = Tween<Offset>(
-          begin: Offset.zero,
-          end: const Offset(1.0, 0.0),
-        );
+        offset.begin =  Offset.zero;
+        offset.end =  const Offset(1.0, 0.0);
         break;
       case MoveDirection.none:
         offset = Tween<Offset>(
@@ -90,11 +86,6 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
         );
         break;
     }
-
-    _offsetAnimation = offset.animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.fastOutSlowIn,
-    ));
   }
 
   @override
@@ -103,7 +94,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
     controlLeftPadding =
         (screenWidth - 3 * spotWidth - 2 * spotHorizontalPadding) / 2;
     controlTopPadding =
-        (boxHeight - 3 * spotHeight - 2 * spotVerticalPadding) / 2;
+        boxHeight - 3 * spotHeight - 2 * spotVerticalPadding-8;
     return Column(
       children: [
         Expanded(
@@ -113,7 +104,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
                 child: Stack(
               children: [
                 Column(
-                  children: [_buildInfo()],
+                  children: [_buildInfo(), _buildInfoMesages()],
                 ),
                 _selectedObject != null
                     ? _buildInteractionBox()
@@ -123,26 +114,119 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
             _buildPlayers()
           ],
         )),
-        Column(children: [_buildControlBox(), _buildNPCs()])
+        Column(children: [_buildControlBox(), _buildNPCRow()])
       ],
     );
   }
 
+  Widget _buildInfoMesages() {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        width: double.infinity,
+        height: double.infinity,
+        child: Obx(() => ListView.builder(
+            itemCount: _bloc.infoMessages.length,
+            reverse: true,
+            itemBuilder: ((context, index) {
+              return Text(_bloc.infoMessages[index],
+                  style: ThemeStyle.textStyle.copyWith(fontSize: 16));
+            }))),
+      ),
+    );
+  }
+
   Widget _buildInteractionBox() {
+    if (_selectedObject == null) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       width: double.infinity,
       height: double.infinity,
       margin: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: ThemeStyle.npcColor,
           border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
           borderRadius: const BorderRadius.all(Radius.circular(8))),
-      child: Column(children: [
-        Row(children: [
-          Text((_selectedObject as Npc).name,
-            style: ThemeStyle.textStyle.copyWith(fontSize: 16))
-        ],)
-      ]),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SizedBox(
+            width: double.infinity,
+            child: Text((_selectedObject as Npc).name,
+                textAlign: TextAlign.center,
+                style: ThemeStyle.textStyle
+                    .copyWith(fontSize: 18, fontWeight: FontWeight.w700)),
+          ),
+          const SizedBox(height: 5),
+          Text(_selectedObject!.getDescription(),
+              // textAlign: TextAlign.start,
+              style: ThemeStyle.textStyle.copyWith(fontSize: 16)),
+          const Spacer(),
+          Row(
+            children: _buildActionButtons(),
+          )
+        ]),
+      ),
+    );
+  }
+
+  List<Widget> _buildActionButtons() {
+    var buttons = <Widget>[];
+    buttons.add(const Spacer());
+    for (var action in _selectedObject!.getActions()) {
+      buttons.add(_buildActionButton(action));
+      buttons.add(const SizedBox(width: 4));
+    }
+    buttons.add(_buildActionButton('leave'));
+    return buttons;
+  }
+
+  Widget _buildActionButton(String action) {
+    return GestureDetector(
+      onTap: () {
+        switch (action) {
+          case 'leave':
+            setState(() {
+              _selectedObject = null;
+            });
+            break;
+          case 'talk':
+            setState(() {
+              _bloc.addInfoMessage('${(_selectedObject as Npc?)?.name}: ${(_selectedObject as Npc?)?.getNextDialog() ?? ''}');
+              _selectedObject = null;
+            });
+            break;
+          default:
+            setState(() {
+              _selectedObject = null;
+            });
+        }
+      },
+      child: SizedBox(
+        height: 40,
+        width: 60,
+      child: Stack(
+          children: [
+            ClipPath(
+                clipper: ParallelogramClipper(),
+                child: Container(color: ThemeStyle.bgColor)),
+            Center(
+              child: ClipPath(
+                  clipper: ParallelogramClipper(),
+                  child: Container(
+                      height: 36,
+                      width: 55,
+                      color: Colors.white,
+                      child: Center(
+                          child: Text(action.tr,
+                              style: ThemeStyle.textStyle
+                                  .copyWith(fontSize: 15))))),
+            )
+          ],
+        ),
+      ),
     );
   }
 
@@ -155,7 +239,8 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
         decoration: BoxDecoration(
             border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
             borderRadius: const BorderRadius.all(Radius.circular(8))),
-        child: Text(shared.currentMap?.description ?? '',
+        child: Text(
+            (shared.currentMap?.description ?? '').replaceAll("\\n", "\n"),
             style: ThemeStyle.textStyle.copyWith(fontSize: 16)));
   }
 
@@ -191,11 +276,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
         ));
   }
 
-  Widget _buildNpc(int index) {
-    if (index >= _bloc.npcs.length) {
-      return const SizedBox.shrink();
-    }
-    final Npc npc = _bloc.npcs[index];
+  Widget _buildNpc(Npc npc) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -207,7 +288,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
           height: spotHeight,
           margin: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 218, 215, 215),
+              color: ThemeStyle.npcColor,
               border: Border.all(color: ThemeStyle.bgColor, width: 2),
               borderRadius: const BorderRadius.all(Radius.circular(12))),
           child: Center(
@@ -218,22 +299,24 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildNPCs() {
-    return SizedBox(
-      height: 46,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 2, 10, 4),
-        child: Row(
-          children: [
-            Text('there_are'.tr,
-                style: ThemeStyle.textStyle.copyWith(fontSize: 16)),
-            Obx(() => _buildNpc(0)),
-            Obx(() => _buildNpc(1)),
-            Obx(() => _buildNpc(2))
-          ],
-        ),
-      ),
-    );
+  Widget _buildNPCRow() {
+    return Obx(() => SizedBox(
+          height: 46,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(2, 2, 10, 4),
+            child: Row(children: _buildNPCs()),
+          ),
+        ));
+  }
+
+  List<Widget> _buildNPCs() {
+    List<Widget> npcs = <Widget>[];
+    npcs.add(Text('there_are'.tr,
+        style: ThemeStyle.textStyle.copyWith(fontSize: 16)));
+    for (var element in _bloc.npcs) {
+      npcs.add(_buildNpc(element));
+    }
+    return npcs;
   }
 
   Widget _buildSpot(Spot? spot, MoveDirection direction,
@@ -259,7 +342,6 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
               }
             });
 
-            _animationController.forward(from: 0.1);
             nextSpot = spot;
             moveDirection = direction;
             setAnimation();
