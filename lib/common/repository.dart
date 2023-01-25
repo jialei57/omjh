@@ -6,6 +6,7 @@ import 'package:omjh/common/api_helper.dart';
 import 'package:omjh/common/common.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/entity/character.dart';
+import 'package:omjh/entity/quest.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Repository {
@@ -69,6 +70,22 @@ class Repository {
     return null;
   }
 
+  Future<List<Quest>?> getQuests(int charId) async {
+    try {
+      final jsonData = await _helper.get('processing-quests/$charId');
+      if (jsonData == null) {
+        return null;
+      }
+
+      List<Quest> quests =
+          (jsonData as List).map((i) => Quest.fromJson(i)).toList();
+
+      return quests;
+    } on SocketException {
+      Get.rawSnackbar(message: 'Connection Failed');
+    }
+    return null;
+  }
   // Future sendMessage(Message message) async {
   //   try {
   //     await _helper.post('messages', jsonEncode(message));
@@ -81,7 +98,22 @@ class Repository {
   Future<dynamic> updateCharacter(Character char) async {
     try {
       return await _helper.put('characters/${char.id!}', jsonEncode(char));
+    } on SocketException {
+      Get.rawSnackbar(message: 'Connection Failed');
+    }
+    return null;
+  }
 
+  Future<Character?> compeleteQuest(int cid, int qid) async {
+    try {
+      final jsonData =
+          await _helper.put('complete-quest', '{"id":"$cid","qid":"$qid"}');
+      if (jsonData == null) {
+        return null;
+      }
+
+      Character updated = Character.fromJson(jsonData);
+      return updated;
     } on SocketException {
       Get.rawSnackbar(message: 'Connection Failed');
     }

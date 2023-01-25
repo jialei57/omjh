@@ -3,12 +3,13 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:omjh/bloc/bloc.dart';
 import 'package:omjh/common/action_cable_helper.dart';
+import 'package:omjh/common/repository.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/npc.dart';
 
 class InfoBoxBloc implements Bloc {
-  // final Repository _repository = Get.put(Repository());
+  final Repository _repository = Get.put(Repository());
   final shared = Get.put(Shared());
   List<Character> players = <Character>[].obs;
   List<Npc> npcs = <Npc>[].obs;
@@ -24,6 +25,15 @@ class InfoBoxBloc implements Bloc {
 
     actionCableHelper.connectToCableAndSubscribe(
         'Map', {'id': char.map, 'charId': char.id}, onMessage);
+  }
+
+  Future completeQuest(int cid, int qid) async {
+    Character? updated = await _repository.compeleteQuest(cid, qid);
+    if (updated != null) {
+      shared.currentCharacter = updated;
+    }
+
+    shared.quests = await _repository.getQuests(shared.currentCharacter!.id!) ?? [];
   }
 
   void addInfoMessage(String msg) {

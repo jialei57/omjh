@@ -101,6 +101,8 @@ class _SplashPageState extends State<SplashPage> {
     shared.characters = chars;
     await shared.init();
 
+    shared.quests = await _bloc.getQuests(shared.currentCharacter!.id!) ?? [];
+
     Get.offAll(() => const HomePage());
   }
 

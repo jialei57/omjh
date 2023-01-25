@@ -22,7 +22,8 @@ class CharacterCreationBloc extends Bloc {
     }
 
     shared.characters = await _repository.getCharacters() ?? [];
-    shared.setChar(shared.characters.length - 1);
+    await shared.setChar(shared.characters.length - 1);
+    shared.quests = await _repository.getQuests(shared.currentCharacter!.id!) ?? [];
     return true;
   }
 }

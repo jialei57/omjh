@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:omjh/bloc/login_bloc.dart';
+import 'package:omjh/common/loading_dialog.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:omjh/main.dart';
 
@@ -11,11 +12,28 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final LoginBloc _bloc = LoginBloc();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  late LoadingDialog _loadingDialog;
+  late final AnimationController _controller =
+      AnimationController(vsync: this, duration: const Duration(seconds: 2))
+        ..repeat();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadingDialog = LoadingDialog(context, _controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   bool validate() {
     final form = _formKey.currentState;
@@ -70,8 +88,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void login() async {
+    _loadingDialog.show();
     final token = await _bloc.authendicate(
         _usernameController.text, _passwordController.text);
+    _loadingDialog.dismiss();
     if (token != null && token.isNotEmpty) {
       Get.offAll(() => const SplashPage());
     }

@@ -1,6 +1,7 @@
 import 'package:omjh/common/common.dart';
 import 'package:omjh/entity/interactable.dart';
 import 'package:get/get.dart';
+import 'package:omjh/entity/quest.dart';
 
 class Character implements Interactable {
   final int? id;
@@ -65,7 +66,6 @@ class Character implements Interactable {
     return getStr();
   }
 
-
   int getDefense() {
     return (getCon() * 0.2).round();
   }
@@ -102,6 +102,14 @@ class Character implements Interactable {
   int getExpToLevelUp() {
     int expToLevelUp = status?['expToLevelUp'] ?? 0;
     return expToLevelUp;
+  }
+
+  List<Quest> getProcessingQuests() {
+    var result = (status?['processingQuests'] as List?)
+        ?.map((e) => Quest.fromJson(e as Map<String, dynamic>))
+        .toList();
+
+    return result ?? [];
   }
 
   @override

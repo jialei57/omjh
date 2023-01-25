@@ -2,6 +2,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:omjh/bloc/character_creation_bloc.dart';
+import 'package:omjh/common/loading_dialog.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:get/get.dart';
 import 'package:omjh/page/home_page.dart';
@@ -13,11 +14,28 @@ class CharacterCreationPage extends StatefulWidget {
   State<CharacterCreationPage> createState() => _CharacterCreationPageState();
 }
 
-class _CharacterCreationPageState extends State<CharacterCreationPage> {
+class _CharacterCreationPageState extends State<CharacterCreationPage>
+    with SingleTickerProviderStateMixin {
   int _step = 0;
   final int maxStep = 5;
   final CharacterCreationBloc _bloc = CharacterCreationBloc();
   final _nameController = TextEditingController();
+  late LoadingDialog _loadingDialog;
+  late final AnimationController _controller =
+      AnimationController(vsync: this, duration: const Duration(seconds: 2))
+        ..repeat();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadingDialog = LoadingDialog(context, _controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -226,7 +244,9 @@ class _CharacterCreationPageState extends State<CharacterCreationPage> {
   void createCharacter() async {
     if (validteName()) {
       _bloc.name = _nameController.text;
+      _loadingDialog.show();
       bool success = await _bloc.createCharacter();
+      _loadingDialog.dismiss();
       if (success) {
         setState(() {
           _step += 1;

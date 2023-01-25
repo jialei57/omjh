@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:omjh/page/character_page.dart';
 import 'package:omjh/page/jianghu_page.dart';
 import 'package:omjh/page/login_page.dart';
+import 'package:omjh/page/quests_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,10 +19,24 @@ class _HomePageState extends State<HomePage> {
   final menuItemHeight = 36.0;
   final menuItemWidth = 120.0;
   // final HomeBloc _bloc = HomeBloc();
+  late PageController _pageController;
+  final List<Widget> _pages = [];
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: _selectedIndex);
+    _pages.add(const JiangHuPage());
+    _pages.add(CharacterPage());
+    _pages.add(const SizedBox.shrink());
+    _pages.add(const SizedBox.shrink());
+    _pages.add(const QuestsPage());
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -50,7 +65,11 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: getBody(_selectedIndex),
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        children: _pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
@@ -77,23 +96,28 @@ class _HomePageState extends State<HomePage> {
         unselectedLabelStyle: ThemeStyle.textStyle.copyWith(fontSize: 18),
         onTap: (index) => {
           setState(
-            () => {_selectedIndex = index},
+            () {
+              _selectedIndex = index;
+              _pageController.jumpToPage(_selectedIndex);
+            },
           )
         },
       ),
     );
   }
 
-  Widget getBody(int index) {
-    switch (index) {
-      case 0:
-        return const JiangHuPage();
-      case 1:
-        return CharacterPage();
-      default:
-        return const Text('Test');
-    }
-  }
+  // Widget getBody(int index) {
+  //   switch (index) {
+  //     case 0:
+  //       return _jianghuPage;
+  //     case 1:
+  //       return CharacterPage();
+  //     case 4:
+  //       return const QuestsPage();
+  //     default:
+  //       return const Text('Test');
+  //   }
+  // }
 
   Widget _buildMenu() {
     return Container(

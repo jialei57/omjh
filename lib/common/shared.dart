@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:omjh/common/common.dart';
 import 'package:omjh/entity/character.dart';
+import 'package:omjh/entity/quest.dart';
 import 'package:omjh/entity/spot.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -13,7 +14,20 @@ class Shared {
   Character? currentCharacter;
   List<Character> characters = [];
   List<Spot> maps = [];
+  List<Quest> quests = [];
   Spot? currentMap;
+
+  Quest? getRelatedQuest(int npcId) {
+    if (quests.isEmpty) return null;
+    for (var e in quests) {
+      var goals = e.goals;
+      if (goals['type'] == 'talk' && goals['npc'] == npcId.toString()) {
+        return e;
+      }
+    }
+
+    return null;
+  }
 
   Future loadMap() async {
     final Directory appDocumentsDirectory =

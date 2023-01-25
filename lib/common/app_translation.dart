@@ -4,7 +4,7 @@ class AppTranslation extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
         'en_US': {
-          'jianghu': 'Jiang Hu',
+          'jianghu': 'Journey',
           'character': 'Chracter',
           'bag': 'Bag',
           'skill': 'Skill',
@@ -46,9 +46,12 @@ class AppTranslation extends Translations {
           'defense': 'Defense',
           'hit': 'Hit',
           'dodge': 'Dodge',
+          'main': 'Main',
+          'you_are_hungry': 'You are hungry.',
+          'kill': 'Kill',
         },
         'zh_CN': {
-          'jianghu': '江湖',
+          'jianghu': '仙途',
           'character': '人物',
           'bag': '背包',
           'skill': '武功',
@@ -90,6 +93,10 @@ class AppTranslation extends Translations {
           'defense': '防御',
           'hit': '命中',
           'dodge': '闪避',
+          'main': '主线',
+          'you_are_hungry': '你的肚子饿的咕咕叫.',
+          'kill': '杀',
+
         }
       };
 }

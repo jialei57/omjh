@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/interactable.dart';
 import 'package:omjh/entity/npc.dart';
+import 'package:omjh/entity/quest.dart';
 import 'package:omjh/entity/spot.dart';
 
 enum MoveDirection { up, down, left, right, none }
@@ -35,7 +36,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   Spot? nextSpot;
   Interactable? _selectedObject;
   Tween<Offset> offset =
-        Tween<Offset>(begin: Offset.zero, end: const Offset(0.0, 0.0));
+      Tween<Offset>(begin: Offset.zero, end: const Offset(0.0, 0.0));
 
   @override
   void initState() {
@@ -54,30 +55,40 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
         });
       }
     });
-  
+
     _offsetAnimation = offset.animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.fastOutSlowIn,
     ));
+
+    if (shared.quests.firstWhereOrNull((element) => element.id == 1) != null) {
+      _bloc.addInfoMessage('you_are_hungry'.tr);
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   void setAnimation() {
     switch (moveDirection) {
       case MoveDirection.up:
-        offset.begin =  Offset.zero;
-        offset.end =  const Offset(0.0, -0.5);
+        offset.begin = Offset.zero;
+        offset.end = const Offset(0.0, -0.5);
         break;
       case MoveDirection.down:
-        offset.begin =  Offset.zero;
-        offset.end =  const Offset(0.0, 0.5);
+        offset.begin = Offset.zero;
+        offset.end = const Offset(0.0, 0.5);
         break;
       case MoveDirection.left:
-        offset.begin =  Offset.zero;
-        offset.end =  const Offset(-1.0, 0.0);
+        offset.begin = Offset.zero;
+        offset.end = const Offset(-1.0, 0.0);
         break;
       case MoveDirection.right:
-        offset.begin =  Offset.zero;
-        offset.end =  const Offset(1.0, 0.0);
+        offset.begin = Offset.zero;
+        offset.end = const Offset(1.0, 0.0);
         break;
       case MoveDirection.none:
         offset = Tween<Offset>(
@@ -94,7 +105,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
     controlLeftPadding =
         (screenWidth - 3 * spotWidth - 2 * spotHorizontalPadding) / 2;
     controlTopPadding =
-        boxHeight - 3 * spotHeight - 2 * spotVerticalPadding-8;
+        boxHeight - 3 * spotHeight - 2 * spotVerticalPadding - 8;
     return Column(
       children: [
         Expanded(
@@ -194,9 +205,22 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
             break;
           case 'talk':
             setState(() {
-              _bloc.addInfoMessage('${(_selectedObject as Npc?)?.name}: ${(_selectedObject as Npc?)?.getNextDialog() ?? ''}');
+              Npc? npc = _selectedObject as Npc?;
+              if (npc == null) return;
+
+              Quest? quest = shared.getRelatedQuest(npc.id ?? -1);
+              if (quest != null) {
+                _bloc.addInfoMessage(
+                    '${npc.name}: ${quest.goals['line'] ?? ''}');
+                _bloc.completeQuest(shared.currentCharacter!.id!, quest.id);
+              } else {
+                _bloc.addInfoMessage('${npc.name}: ${npc.getNextDialog()}');
+              }
               _selectedObject = null;
             });
+            break;
+          case 'kill':
+
             break;
           default:
             setState(() {
@@ -207,7 +231,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
       child: SizedBox(
         height: 40,
         width: 60,
-      child: Stack(
+        child: Stack(
           children: [
             ClipPath(
                 clipper: ParallelogramClipper(),
