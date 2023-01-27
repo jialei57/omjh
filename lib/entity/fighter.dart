@@ -9,6 +9,7 @@ class Fighter {
   Animation<Offset>? animation;
   AnimationController? actionController;
   AnimationController? timeController;
+  String? hitText;
 
   Fighter(this.char, this.isOwnSide) {
     hpLeft = char.getMaxHp();

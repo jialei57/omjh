@@ -52,6 +52,10 @@ class AppTranslation extends Translations {
           'uses': ' uses ',
           'normal_attack': 'normal attack',
           'attack_on': ' @attack on @target',
+          'win': 'Win',
+          'lose': 'Lose',
+          'escaped': 'Escaped',
+          'click_to_quit_fight': '(Click bottom of the screen to quit fight)',
         },
         'zh_CN': {
           'jianghu': '仙途',
@@ -102,6 +106,11 @@ class AppTranslation extends Translations {
           'uses': '使出',
           'normal_attack': '王八拳',
           'attack_on': '向@target@attack',
+          'win': '胜利',
+          'lose': '失败',
+          'escaped': '逃跑成功',
+          'click_to_quit_fight': '(点击界面下方退出战斗)',
+
         }
       };
 }

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:omjh/bloc/splash_bloc.dart';
@@ -44,7 +42,7 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage> {
   final SplashBloc _bloc = SplashBloc();
   double _step = 0;
-  final _maxSteps = 3.0;
+  final _maxSteps = 4.0;
   final _iconSize = 40.0;
   final _progressPadding = 40.0;
 
@@ -64,7 +62,6 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
 
-    sleep(const Duration(milliseconds: 500));
     setState(() {
       _step++;
     });
@@ -78,7 +75,6 @@ class _SplashPageState extends State<SplashPage> {
     Shared shared = Get.put(Shared());
     await shared.loadMap();
 
-    sleep(const Duration(milliseconds: 500));
     setState(() {
       _step++;
     });
@@ -88,7 +84,6 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
 
-    sleep(const Duration(milliseconds:500));
     setState(() {
       _step++;
     });
@@ -102,6 +97,10 @@ class _SplashPageState extends State<SplashPage> {
     await shared.init();
 
     shared.quests = await _bloc.getQuests(shared.currentCharacter!.id!) ?? [];
+
+    setState(() {
+      _step++;
+    });
 
     Get.offAll(() => const HomePage());
   }

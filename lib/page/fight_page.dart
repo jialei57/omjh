@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:math';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:omjh/bloc/fight_bloc.dart';
@@ -11,6 +13,8 @@ import 'package:omjh/entity/npc.dart';
 
 import '../common/puring_hour_glass.dart';
 
+enum FightStatus { fighting, win, lose, escaped }
+
 class FightPage extends StatefulWidget {
   const FightPage({super.key});
 
@@ -20,12 +24,15 @@ class FightPage extends StatefulWidget {
 
 class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
   double fightBoxHeight = 0;
-  double controlBoxHeight = 100;
+  double controlBoxHeight = 130;
+  double controlWidth = 90;
+  double controlHeight = 30;
   double charSize = 80;
   double paddingTop = 8;
   List<Fighter> own = [];
   List<Fighter> enemies = [];
   final FightBloc _bloc = FightBloc();
+  FightStatus _status = FightStatus.fighting;
 
   @override
   void initState() {
@@ -67,7 +74,15 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
     actionController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         actionController.reset();
-        fighter.timeController?.forward();
+        if (_status == FightStatus.fighting) {
+          hit(fighter);
+          fighter.timeController?.forward();
+        }
+      }
+    });
+    actionController.addListener(() {
+      if (_status != FightStatus.fighting) {
+        actionController.stop();
       }
     });
     fighter.actionController = actionController;
@@ -78,8 +93,15 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
     );
     timeController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        timeController.reset();
-        fighter.actionController?.forward();
+        if (_status == FightStatus.fighting) {
+          timeController.reset();
+          fighter.actionController?.forward();
+        }
+      }
+    });
+    timeController.addListener(() {
+      if (_status != FightStatus.fighting) {
+        timeController.stop();
       }
     });
     fighter.timeController = timeController;
@@ -109,15 +131,40 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void hit() {}
+  void hit(Fighter from) {
+    Fighter? to;
+    if (from.isOwnSide) {
+      to = enemies.firstWhereOrNull((e) => e.hpLeft > 0);
+    } else {
+      to = own[Random().nextInt(own.length)];
+    }
+
+    if (to == null) {
+      return;
+    }
+
+    setState(() {
+      to!.hpLeft -= from.char.getAttack();
+      to.hitText = '-${from.char.getAttack()}';
+
+      if (from.isOwnSide) {
+        if (enemies.firstWhereOrNull((e) => e.hpLeft > 0) == null) {
+          _status = FightStatus.win;
+        }
+      } else {
+        if (own.firstWhereOrNull((e) => e.hpLeft > 0) == null) {
+          _status = FightStatus.lose;
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         MediaQuery.of(context).padding.bottom;
-    fightBoxHeight = screenHeight / 2 + MediaQuery.of(context).padding.top;
-    controlBoxHeight = 80;
+    fightBoxHeight = screenHeight / 2.2 + MediaQuery.of(context).padding.top;
     charSize = (fightBoxHeight - paddingTop * 4) / 3;
     return Scaffold(
       body: Column(
@@ -162,7 +209,7 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         Column(children: ownWidgets),
         const SizedBox(
-          width: 20,
+          width: 40,
         ),
         Column(children: enemyWidgets)
       ]),
@@ -190,7 +237,7 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
         children: [
           fighter.isOwnSide
               ? Padding(
-                  padding: const EdgeInsets.only(right: 24, bottom: 10),
+                  padding: EdgeInsets.fromLTRB(0, charSize / 3, 24, 10),
                   child: _buildTimeControl(fighter),
                 )
               : const SizedBox.shrink(),
@@ -243,7 +290,7 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
           ),
           !fighter.isOwnSide
               ? Padding(
-                  padding: const EdgeInsets.only(left: 24, bottom: 10),
+                  padding: EdgeInsets.fromLTRB(24, charSize / 3, 0, 10),
                   child: _buildTimeControl(fighter))
               : const SizedBox.shrink(),
         ],
@@ -254,6 +301,7 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
   Widget _buildTimeControl(Fighter fighter) {
     return Column(
       children: [
+        _buildHitText(fighter),
         const Spacer(),
         SpinKitPouringHourGlass(
           color: ThemeStyle.bgColor,
@@ -262,6 +310,27 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
           controller: fighter.timeController,
         ),
       ],
+    );
+  }
+
+  Widget _buildHitText(Fighter fighter) {
+    if (fighter.hitText == null) {
+      return const SizedBox.shrink();
+    }
+    String text = fighter.hitText!;
+    fighter.hitText = null;
+    return DefaultTextStyle(
+      style: ThemeStyle.textStyle.copyWith(color: Colors.black, fontSize: 18),
+      child: AnimatedTextKit(
+        key: UniqueKey(),
+        animatedTexts: [
+          FadeAnimatedText(
+            text,
+            duration: const Duration(milliseconds: 500),
+          ),
+        ],
+        isRepeatingAnimation: false,
+      ),
     );
   }
 
@@ -286,16 +355,90 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
   }
 
   Widget _buildControlBox() {
+    return Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          height: controlBoxHeight,
+          margin: EdgeInsets.fromLTRB(
+              8, 0, 8, MediaQuery.of(context).padding.bottom + 5),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+              color: Colors.transparent,
+              border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
+              borderRadius: const BorderRadius.all(Radius.circular(8))),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildControl(null),
+                    _buildControl(null),
+                    _buildControl(null)
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildControl(null),
+                    _buildControl(null),
+                    _buildControl(null)
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildControl(null),
+                    _buildControl(null),
+                    _buildControl('逃跑')
+                  ],
+                )
+              ]),
+        ),
+        _status != FightStatus.fighting
+            ? GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                  width: double.infinity,
+                  height: controlBoxHeight,
+                  margin: EdgeInsets.fromLTRB(
+                      8, 0, 8, MediaQuery.of(context).padding.bottom + 5),
+                      padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 59, 59, 59),
+                      border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
+                      borderRadius: const BorderRadius.all(Radius.circular(8))),
+                  child: Column(
+                    children: [
+                      Text(_status.toString().split('.').last.tr,
+                          style: ThemeStyle.textStyle
+                              .copyWith(color: Colors.white, fontSize: 24)),
+                         Text('click_to_quit_fight'.tr,
+                          style: ThemeStyle.textStyle
+                              .copyWith(color: Colors.white, fontSize: 16)),     
+                    ],
+                  )),
+            )
+            : const SizedBox.shrink()
+      ],
+    );
+  }
+
+  Widget _buildControl(String? name) {
+    if (name == null) {
+      return SizedBox(width: controlWidth, height: controlHeight);
+    }
     return Container(
-      width: double.infinity,
-      height: controlBoxHeight,
-      margin: EdgeInsets.fromLTRB(
-          8, 0, 8, MediaQuery.of(context).padding.bottom + 5),
-      padding: const EdgeInsets.all(4.0),
+      width: controlWidth,
+      height: controlHeight,
       decoration: BoxDecoration(
-          color: Colors.transparent,
-          border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
-          borderRadius: const BorderRadius.all(Radius.circular(8))),
+          color: ThemeStyle.unselectedColor,
+          border: Border.all(color: ThemeStyle.bgColor, width: 2)),
+      child: Center(
+          child: Text(name,
+              style: ThemeStyle.textStyle
+                  .copyWith(fontSize: 16, color: Colors.white))),
     );
   }
 }

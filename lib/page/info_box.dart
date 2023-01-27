@@ -231,7 +231,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
             Get.to(() => const FightPage(), arguments: {
               'own': [json.encode(shared.currentCharacter)],
               'npcs': [json.encode(npc)]
-            });
+            }, fullscreenDialog: true);
             break;
           default:
             setState(() {
