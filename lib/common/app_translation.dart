@@ -49,6 +49,9 @@ class AppTranslation extends Translations {
           'main': 'Main',
           'you_are_hungry': 'You are hungry.',
           'kill': 'Kill',
+          'uses': ' uses ',
+          'normal_attack': 'normal attack',
+          'attack_on': ' @attack on @target',
         },
         'zh_CN': {
           'jianghu': '仙途',
@@ -96,7 +99,9 @@ class AppTranslation extends Translations {
           'main': '主线',
           'you_are_hungry': '你的肚子饿的咕咕叫.',
           'kill': '杀',
-
+          'uses': '使出',
+          'normal_attack': '王八拳',
+          'attack_on': '向@target@attack',
         }
       };
 }

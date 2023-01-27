@@ -29,7 +29,8 @@ class Character implements Interactable {
         'sex': sex,
         'map': map,
         'status': status,
-        'user_id': userId
+        'user_id': userId,
+        'created_at': createdAt.toString()
       };
 
   num getAge() {
@@ -38,6 +39,11 @@ class Character implements Interactable {
     }
     Duration diff = DateTime.now().difference(createdAt!);
     return Common.initAge + diff.inDays ~/ 3;
+  }
+
+  @override
+  String getName() {
+    return name;
   }
 
   String getRank() {
@@ -58,27 +64,38 @@ class Character implements Interactable {
     return exp;
   }
 
-  int getHP() {
+  @override
+  int getMaxHp() {
     return getCon() * 10;
   }
 
+  @override
+  int getSpeed() {
+    return getAgi();
+  }
+
+  @override
   int getAttack() {
     return getStr();
   }
 
+  @override
   int getDefense() {
     return (getCon() * 0.2).round();
   }
 
+  @override
   int getHit() {
     return getAgi();
   }
 
+  @override
   int getDodge() {
     return getAgi();
   }
 
-  int getMp() {
+  @override
+  int getMaxMp() {
     if (getLevel() == 0) return 0;
     return getSpi() * 10;
   }

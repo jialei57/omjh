@@ -9,4 +9,13 @@ class Common {
   static const int initAgi = 5;
   static const int initCon = 5;
   static const int initSpi = 5;
+
+  static String getIconForNpc(int id) {
+    switch (id) {
+      case 3:
+        return 'ic_chicken.png';
+      default:
+        return 'ic_not_found.png';
+    }
+  }
 }

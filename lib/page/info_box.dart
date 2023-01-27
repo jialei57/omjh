@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:omjh/bloc/info_box_bloc.dart';
@@ -9,6 +11,7 @@ import 'package:omjh/entity/interactable.dart';
 import 'package:omjh/entity/npc.dart';
 import 'package:omjh/entity/quest.dart';
 import 'package:omjh/entity/spot.dart';
+import 'package:omjh/page/fight_page.dart';
 
 enum MoveDirection { up, down, left, right, none }
 
@@ -220,7 +223,15 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
             });
             break;
           case 'kill':
-
+             Npc? npc = _selectedObject as Npc?;
+            if (npc == null) return;
+            setState(() {
+              _selectedObject = null;
+            });
+            Get.to(() => const FightPage(), arguments: {
+              'own': [json.encode(shared.currentCharacter)],
+              'npcs': [json.encode(npc)]
+            });
             break;
           default:
             setState(() {

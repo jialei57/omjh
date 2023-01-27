@@ -21,6 +21,46 @@ class Npc implements Interactable {
       {'id': id, 'name': name, 'map': map, 'status': status, 'info': info};
 
   @override
+  String getName() {
+    return name;
+  }
+
+  @override
+  int getMaxHp() {
+    return status?['hp'] ?? 0;
+  }
+
+  @override
+  int getSpeed() {
+    return status?['speed'] ?? 0;
+  }
+
+  @override
+  int getMaxMp() {
+    return status?['fmp'] ?? 0;
+  }
+
+  @override
+  int getAttack() {
+    return status?['attack'] ?? 0;
+  }
+
+  @override
+  int getDefense() {
+    return status?['defense'] ?? 0;
+  }
+
+  @override
+  int getHit() {
+    return status?['hit'] ?? 0;
+  }
+
+  @override
+  int getDodge() {
+    return status?['dodge'] ?? 0;
+  }
+
+  @override
   String getDescription() {
     if (info == null) {
       return '';
