@@ -16,6 +16,7 @@ class Shared {
   List<Spot> maps = [];
   List<Quest> quests = [];
   Spot? currentMap;
+  double contentHeight = 0;
 
   Quest? getRelatedQuest(int npcId) {
     if (quests.isEmpty) return null;
@@ -54,16 +55,18 @@ class Shared {
 
     for (var i = 1; i < fields.length; i++) {
       List<dynamic> raw = fields[i];
+      Map<String, dynamic> infoJson =
+          json.decode((raw[8] as String).replaceAll("'", "\""));
       Spot spot = Spot(
-        raw[0] as int,
-        raw[1] as String,
-        raw[2] as String,
-        raw[3] as String,
-        raw[4] is int ? raw[4] as int? : null,
-        raw[5] is int ? raw[5] as int? : null,
-        raw[6] is int ? raw[6] as int? : null,
-        raw[7] is int ? raw[7] as int? : null,
-      );
+          raw[0] as int,
+          raw[1] as String,
+          raw[2] as String,
+          raw[3] as String,
+          raw[4] is int ? raw[4] as int? : null,
+          raw[5] is int ? raw[5] as int? : null,
+          raw[6] is int ? raw[6] as int? : null,
+          raw[7] is int ? raw[7] as int? : null,
+          infoJson);
 
       maps.add(spot);
     }

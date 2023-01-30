@@ -41,6 +41,7 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage> {
   final SplashBloc _bloc = SplashBloc();
+  Shared shared = Get.put(Shared());
   double _step = 0;
   final _maxSteps = 4.0;
   final _iconSize = 40.0;
@@ -72,7 +73,6 @@ class _SplashPageState extends State<SplashPage> {
       return;
     }
 
-    Shared shared = Get.put(Shared());
     await shared.loadMap();
 
     setState(() {
@@ -113,6 +113,9 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    shared.contentHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        MediaQuery.of(context).padding.bottom;
     return Scaffold(
         body: Container(
       decoration: const BoxDecoration(
@@ -123,7 +126,8 @@ class _SplashPageState extends State<SplashPage> {
         const Spacer(),
         LayoutBuilder(builder: (context, constrains) {
           var leftPadding =
-              (constrains.maxWidth - 2*_progressPadding) * _step / _maxSteps + _iconSize / 2;
+              (constrains.maxWidth - 2 * _progressPadding) * _step / _maxSteps +
+                  _iconSize / 2;
           return Padding(
               padding: EdgeInsets.only(left: leftPadding),
               child: Image(
@@ -134,7 +138,8 @@ class _SplashPageState extends State<SplashPage> {
               ));
         }),
         Padding(
-          padding: EdgeInsets.fromLTRB(_progressPadding, 0, _progressPadding, 100),
+          padding:
+              EdgeInsets.fromLTRB(_progressPadding, 0, _progressPadding, 100),
           child: LinearProgressIndicator(
               value: _step / _maxSteps,
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.black),

@@ -56,6 +56,10 @@ class AppTranslation extends Translations {
           'lose': 'Lose',
           'escaped': 'Escaped',
           'click_to_quit_fight': '(Click bottom of the screen to quit fight)',
+          'miss': 'Miss',
+          'but_missed': ', but miised',
+          'get_damage': ', @target get @damage damage',
+          'map': 'Map',
         },
         'zh_CN': {
           'jianghu': '仙途',
@@ -105,11 +109,15 @@ class AppTranslation extends Translations {
           'kill': '杀',
           'uses': '使出',
           'normal_attack': '王八拳',
-          'attack_on': '向@target@attack',
+          'attack_on': '向 @target @attack',
           'win': '胜利',
           'lose': '失败',
           'escaped': '逃跑成功',
           'click_to_quit_fight': '(点击界面下方退出战斗)',
+          'miss': '未命中',
+          'but_missed': ', 但是没打中',
+          'get_damage': ', @target 受到到 @damage 点伤害',
+          'map': '地图',
 
         }
       };

@@ -46,6 +46,7 @@ dependencies:
   md5_file_checksum: ^1.0.4
   csv: ^5.0.1
   flutter_custom_clippers: ^2.1.0
+  dotted_border: ^2.0.0+3
 
 dev_dependencies:
   flutter_test:

@@ -9,6 +9,7 @@ import 'package:omjh/common/common.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/fighter.dart';
+import 'package:omjh/entity/hit_result.dart';
 import 'package:omjh/entity/npc.dart';
 
 import '../common/puring_hour_glass.dart';
@@ -27,8 +28,9 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
   double controlBoxHeight = 130;
   double controlWidth = 90;
   double controlHeight = 30;
-  double charSize = 80;
   double paddingTop = 8;
+  double fighterWidth = 0;
+  double fighterHeight = 80;
   List<Fighter> own = [];
   List<Fighter> enemies = [];
   final FightBloc _bloc = FightBloc();
@@ -144,8 +146,15 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
     }
 
     setState(() {
-      to!.hpLeft -= from.char.getAttack();
-      to.hitText = '-${from.char.getAttack()}';
+      HitResult result = from.getHitResult(to!);
+      _bloc.infoMessages.insert(0, result.description);
+
+      if (result.hitted) {
+        to.hpLeft -= result.damage;
+        to.hitText = '-${result.damage}';
+      } else {
+        to.hitText = 'miss'.tr;
+      }
 
       if (from.isOwnSide) {
         if (enemies.firstWhereOrNull((e) => e.hpLeft > 0) == null) {
@@ -165,7 +174,8 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
         MediaQuery.of(context).padding.top -
         MediaQuery.of(context).padding.bottom;
     fightBoxHeight = screenHeight / 2.2 + MediaQuery.of(context).padding.top;
-    charSize = (fightBoxHeight - paddingTop * 4) / 3;
+    fighterHeight = (fightBoxHeight - paddingTop * 4) / 3;
+    fighterWidth = (MediaQuery.of(context).size.width - 60) / 2;
     return Scaffold(
       body: Column(
         children: [_buildFightBox(), _buildInfoBox(), _buildControlBox()],
@@ -219,7 +229,7 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
   Widget _buildChar(Fighter? fighter) {
     if (fighter == null) {
       return SizedBox(
-        height: charSize,
+        height: fighterHeight,
       );
     }
 
@@ -230,78 +240,85 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
       icon = Common.getIconForNpc((fighter.char as Npc).id!);
     }
 
-    return SizedBox(
-      height: charSize,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          fighter.isOwnSide
-              ? Padding(
-                  padding: EdgeInsets.fromLTRB(0, charSize / 3, 24, 10),
-                  child: _buildTimeControl(fighter),
-                )
-              : const SizedBox.shrink(),
-          SlideTransition(
-            position: fighter.animation!,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  fighter.char.getName(),
-                  style: ThemeStyle.textStyle.copyWith(fontSize: 15),
+    return Stack(
+      children: [
+        SizedBox(
+          width: fighterWidth,
+          height: fighterHeight,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              fighter.isOwnSide
+                  ? Padding(
+                      padding:
+                          EdgeInsets.fromLTRB(0, fighterHeight / 3, 24, 10),
+                      child: _buildTimeControl(fighter),
+                    )
+                  : const SizedBox.shrink(),
+              SlideTransition(
+                position: fighter.animation!,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      fighter.char.getName(),
+                      style: ThemeStyle.textStyle.copyWith(fontSize: 15),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.only(top: 5),
+                      width: fighterHeight / 2.2,
+                      child: LinearProgressIndicator(
+                        //hp bar
+                        minHeight: 8,
+                        value: fighter.hpLeft / fighter.char.getMaxHp(),
+                        valueColor:
+                            const AlwaysStoppedAnimation(ThemeStyle.bgColor),
+                        backgroundColor: ThemeStyle.emptyBarColor,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 2,
+                    ),
+                    fighter.char.getMaxMp() != 0
+                        ? SizedBox(
+                            width: fighterHeight / 2.2,
+                            child: LinearProgressIndicator(
+                              //mp bar
+                              minHeight: 8,
+                              value: fighter.mpLeft / fighter.char.getMaxMp(),
+                              valueColor: const AlwaysStoppedAnimation(
+                                  Color.fromARGB(137, 92, 90, 90)),
+                              backgroundColor: ThemeStyle.emptyBarColor,
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Image(
+                      image: AssetImage('assets/image/$icon'),
+                      width: fighterHeight / 1.8,
+                    ),
+                  ],
                 ),
-                Container(
-                  padding: const EdgeInsets.only(top: 5),
-                  width: charSize / 2.2,
-                  child: LinearProgressIndicator(
-                    //hp bar
-                    minHeight: 8,
-                    value: fighter.hpLeft / fighter.char.getMaxHp(),
-                    valueColor:
-                        const AlwaysStoppedAnimation(ThemeStyle.bgColor),
-                    backgroundColor: ThemeStyle.emptyBarColor,
-                  ),
-                ),
-                const SizedBox(
-                  height: 2,
-                ),
-                fighter.char.getMaxMp() != 0
-                    ? SizedBox(
-                        width: charSize / 2.2,
-                        child: LinearProgressIndicator(
-                          //mp bar
-                          minHeight: 8,
-                          value: fighter.mpLeft / fighter.char.getMaxMp(),
-                          valueColor: const AlwaysStoppedAnimation(
-                              Color.fromARGB(137, 92, 90, 90)),
-                          backgroundColor: ThemeStyle.emptyBarColor,
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-                const SizedBox(
-                  height: 10,
-                ),
-                Image(
-                  image: AssetImage('assets/image/$icon'),
-                  width: charSize / 1.8,
-                ),
-              ],
-            ),
+              ),
+              !fighter.isOwnSide
+                  ? Padding(
+                      padding:
+                          EdgeInsets.fromLTRB(24, fighterHeight / 3, 0, 10),
+                      child: _buildTimeControl(fighter))
+                  : const SizedBox.shrink(),
+            ],
           ),
-          !fighter.isOwnSide
-              ? Padding(
-                  padding: EdgeInsets.fromLTRB(24, charSize / 3, 0, 10),
-                  child: _buildTimeControl(fighter))
-              : const SizedBox.shrink(),
-        ],
-      ),
+        ),
+        _buildHitText(fighter)
+      ],
     );
   }
 
   Widget _buildTimeControl(Fighter fighter) {
     return Column(
       children: [
-        _buildHitText(fighter),
         const Spacer(),
         SpinKitPouringHourGlass(
           color: ThemeStyle.bgColor,
@@ -319,17 +336,26 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
     }
     String text = fighter.hitText!;
     fighter.hitText = null;
-    return DefaultTextStyle(
-      style: ThemeStyle.textStyle.copyWith(color: Colors.black, fontSize: 18),
-      child: AnimatedTextKit(
-        key: UniqueKey(),
-        animatedTexts: [
-          FadeAnimatedText(
-            text,
-            duration: const Duration(milliseconds: 500),
-          ),
-        ],
-        isRepeatingAnimation: false,
+    double fontSize = 18;
+    if (!text.startsWith("-")) {
+      fontSize = 15;
+    }
+    return Positioned(
+      top: 36,
+      left: fighter.isOwnSide ? fighterWidth / 5 : fighterWidth / 3 * 2,
+      child: DefaultTextStyle(
+        style: ThemeStyle.textStyle
+            .copyWith(color: Colors.black, fontSize: fontSize),
+        child: AnimatedTextKit(
+          key: UniqueKey(),
+          animatedTexts: [
+            FadeAnimatedText(
+              text,
+              duration: const Duration(milliseconds: 500),
+            ),
+          ],
+          isRepeatingAnimation: false,
+        ),
       ),
     );
   }
@@ -341,11 +367,11 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
       margin: const EdgeInsets.all(8.0),
       padding: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
-          color: Colors.transparent,
           border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
           borderRadius: const BorderRadius.all(Radius.circular(8))),
       child: Obx(() => ListView.builder(
           itemCount: _bloc.infoMessages.length,
+          padding: EdgeInsets.zero,
           reverse: true,
           itemBuilder: ((context, index) {
             return Text(_bloc.infoMessages[index],
@@ -398,28 +424,30 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
         ),
         _status != FightStatus.fighting
             ? GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                  width: double.infinity,
-                  height: controlBoxHeight,
-                  margin: EdgeInsets.fromLTRB(
-                      8, 0, 8, MediaQuery.of(context).padding.bottom + 5),
-                      padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 59, 59, 59),
-                      border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
-                      borderRadius: const BorderRadius.all(Radius.circular(8))),
-                  child: Column(
-                    children: [
-                      Text(_status.toString().split('.').last.tr,
-                          style: ThemeStyle.textStyle
-                              .copyWith(color: Colors.white, fontSize: 24)),
-                         Text('click_to_quit_fight'.tr,
-                          style: ThemeStyle.textStyle
-                              .copyWith(color: Colors.white, fontSize: 16)),     
-                    ],
-                  )),
-            )
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                    width: double.infinity,
+                    height: controlBoxHeight,
+                    margin: EdgeInsets.fromLTRB(
+                        8, 0, 8, MediaQuery.of(context).padding.bottom + 5),
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 59, 59, 59),
+                        border:
+                            Border.all(color: ThemeStyle.bgColor, width: 1.5),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8))),
+                    child: Column(
+                      children: [
+                        Text(_status.toString().split('.').last.tr,
+                            style: ThemeStyle.textStyle
+                                .copyWith(color: Colors.white, fontSize: 24)),
+                        Text('click_to_quit_fight'.tr,
+                            style: ThemeStyle.textStyle
+                                .copyWith(color: Colors.white, fontSize: 16)),
+                      ],
+                    )),
+              )
             : const SizedBox.shrink()
       ],
     );

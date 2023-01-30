@@ -12,6 +12,7 @@ import 'package:omjh/entity/npc.dart';
 import 'package:omjh/entity/quest.dart';
 import 'package:omjh/entity/spot.dart';
 import 'package:omjh/page/fight_page.dart';
+import 'package:omjh/page/map_page.dart';
 
 enum MoveDirection { up, down, left, right, none }
 
@@ -223,15 +224,17 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
             });
             break;
           case 'kill':
-             Npc? npc = _selectedObject as Npc?;
+            Npc? npc = _selectedObject as Npc?;
             if (npc == null) return;
             setState(() {
               _selectedObject = null;
             });
-            Get.to(() => const FightPage(), arguments: {
-              'own': [json.encode(shared.currentCharacter)],
-              'npcs': [json.encode(npc)]
-            }, fullscreenDialog: true);
+            Get.to(() => const FightPage(),
+                arguments: {
+                  'own': [json.encode(shared.currentCharacter)],
+                  'npcs': [json.encode(npc)]
+                },
+                fullscreenDialog: true);
             break;
           default:
             setState(() {
@@ -463,6 +466,15 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
                 child: Text(shared.currentMap?.city ?? '',
                     style: ThemeStyle.textStyle.copyWith(fontSize: 18))),
             Positioned(
+                top: controlTopPadding,
+                right: 10,
+                child: GestureDetector(
+                  onTap: () => showMap(context),
+                  child: Text('map'.tr,
+                      style: ThemeStyle.textStyle.copyWith(
+                          fontSize: 18, decoration: TextDecoration.underline)),
+                )),
+            Positioned(
               //left
               top: controlTopPadding + spotHeight + spotVerticalPadding,
               left: controlLeftPadding,
@@ -497,5 +509,9 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
             )
           ],
         ));
+  }
+
+  void showMap(BuildContext context) {
+    MapDialog(context).showCurrentMap();
   }
 }
