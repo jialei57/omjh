@@ -21,6 +21,12 @@ class _ChatBoxState extends State<ChatBox> {
     _bloc.init();
   }
 
+  @override
+  void dispose() {
+    _bloc.dispose();
+    super.dispose();
+  }
+
   Widget _buildSubmitButton() {
     return SizedBox(
       height: 24,

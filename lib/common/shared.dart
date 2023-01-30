@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:omjh/common/action_cable_helper.dart';
 import 'package:omjh/common/common.dart';
 import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/quest.dart';
@@ -106,6 +107,8 @@ class Shared {
     storage.deleteAll();
 
     clearFileCache();
+    final actionCableHelper = Get.put(ActionCableHelper());
+    actionCableHelper.cable.disconnect();
   }
 
   Future clearFileCache() async {

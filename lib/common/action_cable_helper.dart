@@ -12,6 +12,10 @@ class ActionCableHelper {
   ActionCableStatus status = ActionCableStatus.disconnected;
   Map<String, Subscribed> subscribers = {};
 
+  void dispose() {
+    cable.disconnect();
+  }
+
   void addSubscriber(
       String channel, Map<String, dynamic>? params, Function onMessage) {
     var channleId = channel;
@@ -110,7 +114,8 @@ class ActionCableHelper {
       var subscriber = subscribers[k];
       cable.unsubscribe(subscriber!.channel, channelParams: subscriber.params);
       subscribers.remove(k);
-      print('unsubscribed from ${subscriber.channel}: ${subscriber.params?.toString()}');
+      print(
+          'unsubscribed from ${subscriber.channel}: ${subscriber.params?.toString()}');
     });
   }
 

@@ -33,24 +33,30 @@ class ChatBoxBloc implements Bloc {
   void onMessage(Map message) {
     if (message['online'] == true) {
       Get.dialog(
-          AlertDialog(
-            content: Text('login_in_other_device'.tr),
-            actions: [
-              TextButton(
-                child: Text('close'.tr),
-                onPressed: () {
-                  shared.logout();
-                  Get.offAll(const LoginPage());
-                },
+              AlertDialog(
+                content: Text('login_in_other_device'.tr),
+                actions: [
+                  TextButton(
+                    child: Text('close'.tr),
+                    onPressed: () {
+                      shared.logout();
+                      Get.offAll(const LoginPage());
+                    },
+                  )
+                ],
               ),
-            ],
-          ),
-          barrierDismissible: false);
+              barrierDismissible: false)
+          .then((_) {
+        shared.logout();
+        Get.offAll(const LoginPage());
+      });
       return;
     }
     messages.add(Message.fromJson(message as Map<String, dynamic>));
   }
 
   @override
-  void dispose() {}
+  void dispose() {
+    actionCableHelper.dispose();
+  }
 }
