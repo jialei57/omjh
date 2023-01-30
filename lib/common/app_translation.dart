@@ -60,6 +60,8 @@ class AppTranslation extends Translations {
           'but_missed': ', but miised',
           'get_damage': ', @target get @damage damage',
           'map': 'Map',
+          'login_in_other_device': 'Your account is already logged in elsewhere.',
+          'close': 'Close',
         },
         'zh_CN': {
           'jianghu': '仙途',
@@ -118,6 +120,7 @@ class AppTranslation extends Translations {
           'but_missed': ', 但是没打中',
           'get_damage': ', @target 受到到 @damage 点伤害',
           'map': '地图',
+          'login_in_other_device': '关闭',
 
         }
       };
