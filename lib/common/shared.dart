@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:omjh/common/action_cable_helper.dart';
 import 'package:omjh/common/common.dart';
 import 'package:omjh/entity/character.dart';
+import 'package:omjh/entity/quantified_item.dart';
 import 'package:omjh/entity/quest.dart';
 import 'package:omjh/entity/spot.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,6 +17,7 @@ class Shared {
   List<Character> characters = [];
   List<Spot> maps = [];
   List<Quest> quests = [];
+  List<QuantifiedItem> items = [];
   Spot? currentMap;
   double contentHeight = 0;
 

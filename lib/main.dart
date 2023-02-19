@@ -43,7 +43,7 @@ class _SplashPageState extends State<SplashPage> {
   final SplashBloc _bloc = SplashBloc();
   Shared shared = Get.put(Shared());
   double _step = 0;
-  final _maxSteps = 4.0;
+  final _maxSteps = 5.0;
   final _iconSize = 40.0;
   final _progressPadding = 40.0;
 
@@ -97,6 +97,12 @@ class _SplashPageState extends State<SplashPage> {
     await shared.init();
 
     shared.quests = await _bloc.getQuests(shared.currentCharacter!.id!) ?? [];
+
+    setState(() {
+      _step++;
+    });
+
+    shared.items = await _bloc.getItems(shared.currentCharacter!.id!) ?? [];
 
     setState(() {
       _step++;

@@ -9,4 +9,5 @@ abstract class Interactable {
   int getHit();
   int getDodge();
   int getSpeed();
+  int getId();
 }

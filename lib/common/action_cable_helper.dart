@@ -1,9 +1,9 @@
 // ignore_for_file: avoid_print
-import 'package:action_cable/action_cable.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:omjh/common/common.dart';
 import 'package:omjh/entity/subscribed.dart';
+import 'package:omjh/lib/action_cable.dart';
 
 enum ActionCableStatus { connecting, connected, disconnected }
 
@@ -47,7 +47,7 @@ class ActionCableHelper {
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: Common.authendicationToken);
     try {
-      cable = ActionCable.Connect("ws://${Common.baseIP}/cable", headers: {
+      cable = ActionCable.connect("ws://${Common.baseIP}/cable", headers: {
         "Authorization": token ?? '',
       }, onConnected: () {
         print("connected");

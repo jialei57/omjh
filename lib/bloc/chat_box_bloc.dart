@@ -44,6 +44,8 @@ class ChatBoxBloc implements Bloc {
                     },
                   )
                 ],
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0))),
               ),
               barrierDismissible: false)
           .then((_) {

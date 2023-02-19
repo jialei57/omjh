@@ -33,7 +33,8 @@ class InfoBoxBloc implements Bloc {
       shared.currentCharacter = updated;
     }
 
-    shared.quests = await _repository.getQuests(shared.currentCharacter!.id!) ?? [];
+    shared.quests =
+        await _repository.getQuests(shared.currentCharacter!.id!) ?? [];
   }
 
   void addInfoMessage(String msg) {
@@ -59,6 +60,11 @@ class InfoBoxBloc implements Bloc {
     final action = msg['action'] as String?;
     final map = msg['map'] as int?;
 
+    if (action == 'npc_die') {
+      npcs.removeWhere((element) => element.id == msg['npc']);
+      return;
+    }
+
     if (map != shared.currentCharacter!.map) {
       return;
     }
@@ -74,9 +80,13 @@ class InfoBoxBloc implements Bloc {
           .toList();
       players.replaceRange(0, players.length, allPlayers);
       npcs.replaceRange(0, npcs.length, allNpcs);
-    } else if (action == 'leave') {
+      return;
+    }
+
+    if (action == 'leave') {
       final player = Character.fromJson(json.decode(msg['player']));
       players.removeWhere((element) => element.id == player.id);
+      return;
     }
   }
 }

@@ -6,13 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:omjh/bloc/fight_bloc.dart';
 import 'package:omjh/common/common.dart';
+import 'package:omjh/common/loading_dialog.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/fighter.dart';
 import 'package:omjh/entity/hit_result.dart';
 import 'package:omjh/entity/npc.dart';
-
-import '../common/puring_hour_glass.dart';
+import 'package:omjh/entity/reward.dart';
+import 'package:omjh/lib/puring_hour_glass.dart';
 
 enum FightStatus { fighting, win, lose, escaped }
 
@@ -22,8 +23,7 @@ class FightPage extends StatefulWidget {
   @override
   State<FightPage> createState() => _FightPageState();
 }
-
-class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
+class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
   double fightBoxHeight = 0;
   double controlBoxHeight = 130;
   double controlWidth = 90;
@@ -33,12 +33,19 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
   double fighterHeight = 80;
   List<Fighter> own = [];
   List<Fighter> enemies = [];
+  Reward? reward;
   final FightBloc _bloc = FightBloc();
   FightStatus _status = FightStatus.fighting;
+  late LoadingDialog _loadingDialog;
+  late final AnimationController _loadingController =
+      AnimationController(vsync: this, duration: const Duration(seconds: 2))
+        ..repeat();
 
   @override
   void initState() {
     super.initState();
+    _loadingDialog = LoadingDialog(context, _loadingController);
+
     dynamic argumentData = Get.arguments;
     dynamic ownJson = json.decode(argumentData['own'].toString());
     List<Character> ownChars =
@@ -130,6 +137,7 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
       e.actionController?.dispose();
       e.timeController?.dispose();
     }
+    _loadingController.dispose();
     super.dispose();
   }
 
@@ -158,13 +166,22 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
 
       if (from.isOwnSide) {
         if (enemies.firstWhereOrNull((e) => e.hpLeft > 0) == null) {
-          _status = FightStatus.win;
+          _updateFightResult(enemies.map((e) => e.char.getId()).toList());
         }
       } else {
         if (own.firstWhereOrNull((e) => e.hpLeft > 0) == null) {
           _status = FightStatus.lose;
         }
       }
+    });
+  }
+
+  Future _updateFightResult(List<int> nids) async {
+    _loadingDialog.show();
+    reward = await _bloc.killedNpc(nids);
+    _loadingDialog.dismiss();
+    setState(() {
+      _status = FightStatus.win;
     });
   }
 
@@ -442,6 +459,7 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
                         Text(_status.toString().split('.').last.tr,
                             style: ThemeStyle.textStyle
                                 .copyWith(color: Colors.white, fontSize: 24)),
+                        _buildRewards(),
                         Text('click_to_quit_fight'.tr,
                             style: ThemeStyle.textStyle
                                 .copyWith(color: Colors.white, fontSize: 16)),
@@ -450,6 +468,22 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
               )
             : const SizedBox.shrink()
       ],
+    );
+  }
+
+  Widget _buildRewards() {
+    if (reward == null) return const SizedBox.shrink();
+
+    var items = reward!.items;
+    String text = 'obtained'.tr;
+    for (var item in items) {
+      text += ' ${item.item.name}x${item.quantity}';
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 5, 20, 10),
+      child:  Text(text,
+            style: ThemeStyle.textStyle
+                .copyWith(fontSize: 16, color: Colors.white)),
     );
   }
 

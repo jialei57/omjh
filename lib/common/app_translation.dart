@@ -63,6 +63,11 @@ class AppTranslation extends Translations {
           'login_in_other_device':
               'Your account is already logged in elsewhere.',
           'close': 'Close',
+          'obtained': 'Obtained',
+          'equipment': 'Equipment',
+          'other_item': 'Other',
+          'item': 'Item',
+          'quantity': 'Quantity',
         },
         'zh_CN': {
           'jianghu': '仙途',
@@ -113,16 +118,21 @@ class AppTranslation extends Translations {
           'uses': '使出',
           'normal_attack': '王八拳',
           'attack_on': '向 @target @attack',
-          'win': '胜利',
-          'lose': '失败',
+          'win': '胜',
+          'lose': '败',
           'escaped': '逃跑成功',
           'click_to_quit_fight': '(点击界面下方退出战斗)',
           'miss': '未命中',
           'but_missed': ', 但是没打中',
-          'get_damage': ', @target 受到到 @damage 点伤害',
+          'get_damage': ', @target 受到 @damage 点伤害',
           'map': '地图',
           'login_in_other_device': '您的账号已在其他地方登录.',
           'close': '关闭',
+          'obtained': '获得',
+          'equipment': '装备',
+          'other_item': '杂物',
+          'item': '物品',
+          'quantity': '数量',
         }
       };
 }

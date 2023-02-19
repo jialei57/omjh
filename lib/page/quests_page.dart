@@ -44,7 +44,8 @@ class _QuestsState extends State<QuestsPage> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(verticalPadding+8, 5, verticalPadding+8, 0),
+          padding: EdgeInsets.fromLTRB(
+              verticalPadding + 8, 5, verticalPadding + 8, 0),
           child: Text(quest.description.replaceAll("\\n", "\n"),
               style: ThemeStyle.textStyle.copyWith(fontSize: 16)),
         ),
@@ -58,13 +59,21 @@ class _QuestsState extends State<QuestsPage> {
       var items = quest.itemsNeeded();
       var itemTexts = <Widget>[];
       for (var item in items) {
+        var bagItem = shared.items
+            .firstWhereOrNull((element) => element.item.id == item.item.id);
+        var quantity = 0;
+        if (bagItem != null) {
+          quantity = bagItem.quantity;
+        }
+
         itemTexts.add(
-          Text('-0/${item.quantity} ${item.item.name}',
+          Text('- $quantity/${item.quantity} ${item.item.name}',
               style: ThemeStyle.textStyle.copyWith(fontSize: 16)),
         );
       }
       return Padding(
-        padding: EdgeInsets.fromLTRB(verticalPadding+8, 5, verticalPadding+8, 20),
+        padding: EdgeInsets.fromLTRB(
+            verticalPadding + 8, 5, verticalPadding + 8, 20),
         child: Column(
           children: itemTexts,
         ),

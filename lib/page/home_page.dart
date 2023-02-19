@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:get/get.dart';
+import 'package:omjh/page/bag_page.dart';
 import 'package:omjh/page/character_page.dart';
 import 'package:omjh/page/jianghu_page.dart';
 import 'package:omjh/page/login_page.dart';
@@ -28,7 +29,7 @@ class _HomePageState extends State<HomePage> {
     _pageController = PageController(initialPage: _selectedIndex);
     _pages.add(const JiangHuPage());
     _pages.add(CharacterPage());
-    _pages.add(const SizedBox.shrink());
+    _pages.add(const BagPage());
     _pages.add(const SizedBox.shrink());
     _pages.add(const QuestsPage());
   }

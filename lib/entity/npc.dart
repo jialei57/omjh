@@ -26,6 +26,11 @@ class Npc implements Interactable {
   }
 
   @override
+  int getId() {
+    return id!;
+  }
+
+  @override
   int getMaxHp() {
     return status?['hp'] ?? 0;
   }

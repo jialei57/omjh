@@ -6,7 +6,9 @@ import 'package:omjh/common/api_helper.dart';
 import 'package:omjh/common/common.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/entity/character.dart';
+import 'package:omjh/entity/quantified_item.dart';
 import 'package:omjh/entity/quest.dart';
+import 'package:omjh/entity/reward.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Repository {
@@ -86,6 +88,24 @@ class Repository {
     }
     return null;
   }
+
+  Future<List<QuantifiedItem>?> getItems(int charId) async {
+    try {
+      final jsonData = await _helper.get('items/$charId');
+      if (jsonData == null) {
+        return null;
+      }
+
+      List<QuantifiedItem> items =
+          (jsonData as List).map((i) => QuantifiedItem.fromJson(i)).toList();
+
+      return items;
+    } on SocketException {
+      Get.rawSnackbar(message: 'Connection Failed');
+    }
+    return null;
+  }
+
   // Future sendMessage(Message message) async {
   //   try {
   //     await _helper.post('messages', jsonEncode(message));
@@ -95,14 +115,14 @@ class Repository {
   //   return;
   // }
 
-  Future<dynamic> updateCharacter(Character char) async {
-    try {
-      return await _helper.put('characters/${char.id!}', jsonEncode(char));
-    } on SocketException {
-      Get.rawSnackbar(message: 'Connection Failed');
-    }
-    return null;
-  }
+  // Future<dynamic> updateCharacter(Character char) async {
+  //   try {
+  //     return await _helper.put('characters/${char.id!}', jsonEncode(char));
+  //   } on SocketException {
+  //     Get.rawSnackbar(message: 'Connection Failed');
+  //   }
+  //   return null;
+  // }
 
   Future<Character?> compeleteQuest(int cid, int qid) async {
     try {
@@ -114,6 +134,32 @@ class Repository {
 
       Character updated = Character.fromJson(jsonData);
       return updated;
+    } on SocketException {
+      Get.rawSnackbar(message: 'Connection Failed');
+    }
+    return null;
+  }
+
+  Future<Reward?> killedNpc(int cid, List<int> nids) async {
+    try {
+      final jsonData =
+          await _helper.put('killed-npc', '{"id":"$cid","nids": $nids}');
+      if (jsonData == null) {
+        return null;
+      }
+
+      Character updated = Character.fromJson(jsonData['char']);
+      shared.currentCharacter = updated;
+
+      if (jsonData['item_changed'] == true) {
+        List<QuantifiedItem> items = (jsonData['items'] as List)
+            .map((i) => QuantifiedItem.fromJson(i))
+            .toList();
+        shared.items = items;
+      }
+
+      Reward reward = Reward.fromJson(jsonData['reward']);
+      return reward;
     } on SocketException {
       Get.rawSnackbar(message: 'Connection Failed');
     }

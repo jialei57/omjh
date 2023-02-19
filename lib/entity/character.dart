@@ -46,6 +46,11 @@ class Character implements Interactable {
     return name;
   }
 
+  @override
+  int getId() {
+    return id!;
+  }
+
   String getRank() {
     int level = getLevel();
     if (level == 0) {
