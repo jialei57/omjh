@@ -68,6 +68,9 @@ class AppTranslation extends Translations {
           'other_item': 'Other',
           'item': 'Item',
           'quantity': 'Quantity',
+          'completed': 'Completed',
+          'collect': 'Collect',
+          'chop': 'Chop',
         },
         'zh_CN': {
           'jianghu': '仙途',
@@ -133,6 +136,9 @@ class AppTranslation extends Translations {
           'other_item': '杂物',
           'item': '物品',
           'quantity': '数量',
+          'completed': '已完成',
+          'collect': '采摘',
+          'chop': '砍',
         }
       };
 }

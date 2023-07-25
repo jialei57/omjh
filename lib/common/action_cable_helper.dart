@@ -55,14 +55,14 @@ class ActionCableHelper {
         subscribeAll();
       }, onConnectionLost: () {
         status = ActionCableStatus.disconnected;
-        print("connection lost, retry in 3 sec");
-        Future.delayed(const Duration(seconds: 3), () {
+        print("connection lost, retry in 5 sec");
+        Future.delayed(const Duration(seconds: 5), () {
           initConnection();
         });
       }, onCannotConnect: () {
         status = ActionCableStatus.disconnected;
-        print("cannot connect, retry in 3 sec");
-        Future.delayed(const Duration(seconds: 3), () {
+        print("cannot connect, retry in 5 sec");
+        Future.delayed(const Duration(seconds: 5), () {
           initConnection();
         });
       });

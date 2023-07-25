@@ -109,11 +109,11 @@ class _BagPageState extends State<BagPage> {
   }
 
   Widget _buildDescription() {
-    if (_selectedIndex >= shared.items.length) {
+    if (_selectedIndex >= items.length) {
       return const SizedBox.shrink();
     }
 
-    return Text(shared.items[_selectedIndex].item.info['description'],
+    return Text(items[_selectedIndex].item.info['description'],
         style: ThemeStyle.textStyle.copyWith(fontSize: 15));
   }
 
@@ -121,7 +121,7 @@ class _BagPageState extends State<BagPage> {
     if (index >= items.length) {
       return const SizedBox.shrink();
     }
-    QuantifiedItem item = items[_selectedIndex];
+    QuantifiedItem item = items[index];
     return GestureDetector(
       onTap: () {
         setState(() {

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:omjh/common/api_helper.dart';
 import 'package:omjh/common/common.dart';
 import 'package:omjh/common/shared.dart';
@@ -14,6 +15,7 @@ import 'package:path_provider/path_provider.dart';
 class Repository {
   final ApiHelper _helper = ApiHelper();
   final shared = Get.put(Shared());
+  final logger = Logger();
   Future<int> getVersion() async {
     try {
       final jsonData = await _helper.get('mobile-app-version');
@@ -22,7 +24,8 @@ class Repository {
       }
 
       return jsonData['version'];
-    } on SocketException {
+    } on SocketException catch (e) {
+      logger.d(e);
       Get.rawSnackbar(message: 'Connection Failed');
     }
     return 0;
@@ -72,9 +75,10 @@ class Repository {
     return null;
   }
 
-  Future<List<Quest>?> getQuests(int charId) async {
+  Future getQuests() async {
     try {
-      final jsonData = await _helper.get('processing-quests/$charId');
+      final jsonData =
+          await _helper.get('processing-quests/${shared.currentCharacter!.id}');
       if (jsonData == null) {
         return null;
       }
@@ -82,16 +86,17 @@ class Repository {
       List<Quest> quests =
           (jsonData as List).map((i) => Quest.fromJson(i)).toList();
 
-      return quests;
+      shared.quests = quests;
     } on SocketException {
       Get.rawSnackbar(message: 'Connection Failed');
     }
     return null;
   }
 
-  Future<List<QuantifiedItem>?> getItems(int charId) async {
+  Future getItems() async {
     try {
-      final jsonData = await _helper.get('items/$charId');
+      final jsonData =
+          await _helper.get('items/${shared.currentCharacter!.id}');
       if (jsonData == null) {
         return null;
       }
@@ -99,7 +104,7 @@ class Repository {
       List<QuantifiedItem> items =
           (jsonData as List).map((i) => QuantifiedItem.fromJson(i)).toList();
 
-      return items;
+      shared.items = items;
     } on SocketException {
       Get.rawSnackbar(message: 'Connection Failed');
     }
@@ -124,7 +129,7 @@ class Repository {
   //   return null;
   // }
 
-  Future<Character?> compeleteQuest(int cid, int qid) async {
+  Future compeleteQuest(int cid, int qid) async {
     try {
       final jsonData =
           await _helper.put('complete-quest', '{"id":"$cid","qid":"$qid"}');
@@ -133,7 +138,11 @@ class Repository {
       }
 
       Character updated = Character.fromJson(jsonData);
-      return updated;
+      shared.currentCharacter = updated;
+
+      await getQuests();
+
+      return;
     } on SocketException {
       Get.rawSnackbar(message: 'Connection Failed');
     }
@@ -152,10 +161,7 @@ class Repository {
       shared.currentCharacter = updated;
 
       if (jsonData['item_changed'] == true) {
-        List<QuantifiedItem> items = (jsonData['items'] as List)
-            .map((i) => QuantifiedItem.fromJson(i))
-            .toList();
-        shared.items = items;
+        await getItems();
       }
 
       Reward reward = Reward.fromJson(jsonData['reward']);

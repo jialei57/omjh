@@ -55,33 +55,36 @@ class _QuestsState extends State<QuestsPage> {
   }
 
   Widget _buildCollection(Quest quest) {
-    if (quest.goals['type'] == 'collect') {
-      var items = quest.itemsNeeded();
-      var itemTexts = <Widget>[];
-      for (var item in items) {
-        var bagItem = shared.items
-            .firstWhereOrNull((element) => element.item.id == item.item.id);
-        var quantity = 0;
-        if (bagItem != null) {
-          quantity = bagItem.quantity;
-        }
-
-        itemTexts.add(
-          Text('- $quantity/${item.quantity} ${item.item.name}',
-              style: ThemeStyle.textStyle.copyWith(fontSize: 16)),
-        );
-      }
-      return Padding(
-        padding: EdgeInsets.fromLTRB(
-            verticalPadding + 8, 5, verticalPadding + 8, 20),
-        child: Column(
-          children: itemTexts,
-        ),
+    var items = quest.itemsNeeded();
+    if (items.isEmpty) {
+      return const SizedBox(
+        height: 20,
       );
     }
 
-    return const SizedBox(
-      height: 20,
+    var itemTexts = <Widget>[];
+    for (var item in items) {
+      var bagItem = shared.items
+          .firstWhereOrNull((element) => element.item.id == item.item.id);
+      var quantity = 0;
+      if (bagItem != null) {
+        quantity = bagItem.quantity;
+      }
+
+      String completed =
+          quantity >= item.quantity ? ' (${'completed'.tr})' : '';
+      itemTexts.add(
+        Text('- $quantity/${item.quantity} ${item.item.name} $completed',
+            style: ThemeStyle.textStyle.copyWith(fontSize: 16)),
+      );
+    }
+    return Padding(
+      padding:
+          EdgeInsets.fromLTRB(verticalPadding + 16, 5, verticalPadding + 8, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: itemTexts,
+      ),
     );
   }
 }

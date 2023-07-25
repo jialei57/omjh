@@ -45,7 +45,7 @@ class Fighter {
       attackLine = 'uses'.tr + 'normal_attack'.tr;
     } else if (char is Npc) {
       Npc npc = char as Npc;
-      attackLine = ((npc.info!['type'] == 'animal') ? '' : 'uses'.tr) +
+      attackLine = ((npc.type == 'animal') ? '' : 'uses'.tr) +
           npc.info!['normal_attack'];
     }
     result.description = char.getName() +

@@ -7,6 +7,7 @@ import 'package:omjh/common/repository.dart';
 import 'package:omjh/common/shared.dart';
 import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/npc.dart';
+import 'package:omjh/entity/reward.dart';
 
 class InfoBoxBloc implements Bloc {
   final Repository _repository = Get.put(Repository());
@@ -28,13 +29,11 @@ class InfoBoxBloc implements Bloc {
   }
 
   Future completeQuest(int cid, int qid) async {
-    Character? updated = await _repository.compeleteQuest(cid, qid);
-    if (updated != null) {
-      shared.currentCharacter = updated;
-    }
+    await _repository.compeleteQuest(cid, qid);
+  }
 
-    shared.quests =
-        await _repository.getQuests(shared.currentCharacter!.id!) ?? [];
+  Future<Reward?> killedNpc(List<int> nids) async {
+    return await _repository.killedNpc(shared.currentCharacter!.id!, nids);
   }
 
   void addInfoMessage(String msg) {

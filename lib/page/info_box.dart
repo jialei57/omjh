@@ -10,6 +10,7 @@ import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/interactable.dart';
 import 'package:omjh/entity/npc.dart';
 import 'package:omjh/entity/quest.dart';
+import 'package:omjh/entity/reward.dart';
 import 'package:omjh/entity/spot.dart';
 import 'package:omjh/page/fight_page.dart';
 import 'package:omjh/page/map_page.dart';
@@ -214,9 +215,17 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
 
               Quest? quest = shared.getRelatedQuest(npc.id ?? -1);
               if (quest != null) {
-                _bloc.addInfoMessage(
-                    '${npc.name}: ${quest.goals['line'] ?? ''}');
-                _bloc.completeQuest(shared.currentCharacter!.id!, quest.id);
+                if (quest.canComplete()) {
+                  _bloc.addInfoMessage(
+                      '${npc.name}: ${quest.goals['line2'] ?? ''}');
+                  _bloc.completeQuest(shared.currentCharacter!.id!, quest.id);
+                  if (quest.goals['aside'] != null) {
+                    _bloc.addInfoMessage(quest.goals['aside']);
+                  }
+                } else {
+                  _bloc.addInfoMessage(
+                      '${npc.name}: ${quest.goals['line1'] ?? ''}');
+                }
               } else {
                 _bloc.addInfoMessage('${npc.name}: ${npc.getNextDialog()}');
               }
@@ -235,6 +244,15 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
                   'npcs': [json.encode(npc)]
                 },
                 fullscreenDialog: true);
+            break;
+          case 'collect':
+          case 'chop':
+            Npc? npc = _selectedObject as Npc?;
+            if (npc == null) return;
+            setState(() {
+              _selectedObject = null;
+            });
+            killNpc(npc.id!);
             break;
           default:
             setState(() {
@@ -266,6 +284,21 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  killNpc(int nid) async {
+    List<int> nids = [];
+    nids.add(nid);
+    Reward? reward = await _bloc.killedNpc(nids);
+    if (reward == null) return;
+    var items = reward.items;
+    String text = 'obtained'.tr;
+    for (var item in items) {
+      text += ' ${item.item.name}x${item.quantity}';
+    }
+    setState(() {
+      _bloc.addInfoMessage(text);
+    });
   }
 
   Widget _buildInfo() {
@@ -374,7 +407,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
             }
             _bloc.moveToMap(spot.id);
 
-            Future.delayed(const Duration(milliseconds: 1500), () {
+            Future.delayed(const Duration(milliseconds: 3000), () {
               if (shared.currentCharacter!.map == spot.id) {
                 _bloc.lookAtMap();
               }

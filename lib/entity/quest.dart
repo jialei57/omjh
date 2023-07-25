@@ -1,3 +1,5 @@
+import 'package:get/get.dart';
+import 'package:omjh/common/shared.dart';
 import 'package:omjh/entity/quantified_item.dart';
 
 class Quest {
@@ -22,5 +24,28 @@ class Quest {
     List<QuantifiedItem> items =
         (json as List).map((i) => QuantifiedItem.fromJson(i)).toList();
     return items;
+  }
+
+  bool canComplete() {
+    if (goals['items'] == null) {
+      return true;
+    }
+
+    var items = itemsNeeded();
+    final shared = Get.put(Shared());
+    for (var item in items) {
+      var bagItem = shared.items
+          .firstWhereOrNull((element) => element.item.id == item.item.id);
+      var quantity = 0;
+      if (bagItem != null) {
+        quantity = bagItem.quantity;
+      }
+
+      if (quantity < item.quantity) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }

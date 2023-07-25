@@ -2,8 +2,6 @@ import 'package:get/get.dart';
 import 'package:omjh/bloc/bloc.dart';
 import 'package:omjh/common/repository.dart';
 import 'package:omjh/entity/character.dart';
-import 'package:omjh/entity/quantified_item.dart';
-import 'package:omjh/entity/quest.dart';
 
 class SplashBloc implements Bloc {
   final Repository _repository = Get.put(Repository());
@@ -16,12 +14,12 @@ class SplashBloc implements Bloc {
     return await _repository.getCharacters();
   }
 
-  Future<List<Quest>?> getQuests(int charId) async {
-    return await _repository.getQuests(charId);
+  Future getQuests() async {
+    await _repository.getQuests();
   }
 
-  Future<List<QuantifiedItem>?> getItems(int charId) async {
-    return await _repository.getItems(charId);
+  Future getItems() async {
+    return _repository.getItems();
   }
 
   Future<bool> getMap() async {

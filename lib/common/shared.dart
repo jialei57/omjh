@@ -25,7 +25,7 @@ class Shared {
     if (quests.isEmpty) return null;
     for (var e in quests) {
       var goals = e.goals;
-      if (goals['type'] == 'talk' && goals['npc'] == npcId.toString()) {
+      if (goals['npc'] == npcId.toString()) {
         return e;
       }
     }
