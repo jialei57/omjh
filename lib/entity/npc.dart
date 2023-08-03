@@ -1,4 +1,5 @@
 import 'package:omjh/entity/interactable.dart';
+import 'package:omjh/entity/skill.dart';
 
 class Npc implements Interactable {
   final int? id;
@@ -7,9 +8,11 @@ class Npc implements Interactable {
   final String? type;
   final Map<String, dynamic>? status;
   final Map<String, dynamic>? info;
+  List<Skill>? skills;
   int _dialogIndex = 0;
 
-  Npc(this.id, this.name, this.map, this.type, this.status, this.info);
+  Npc(this.id, this.name, this.map, this.type, this.status, this.info,
+      this.skills);
 
   Npc.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -19,8 +22,14 @@ class Npc implements Interactable {
         status = json['status'],
         info = json['info'];
 
-  Map<String, dynamic> toJson() =>
-      {'id': id, 'name': name, 'map': map, 'npc_type': type, 'status': status, 'info': info};
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'map': map,
+        'npc_type': type,
+        'status': status,
+        'info': info
+      };
 
   @override
   String getName() {

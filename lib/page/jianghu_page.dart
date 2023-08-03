@@ -15,7 +15,14 @@ class _JiangHuPageState extends State<JiangHuPage> with AutomaticKeepAliveClient
   Widget build(BuildContext context) {
     super.build(context);
     return Container(
-      color: Colors.white,
+      // color: Colors.white,
+      decoration: BoxDecoration(
+          image: DecorationImage(
+            image: const AssetImage("assets/image/ic_shancun.jpg"),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
+          ),
+        ),
       child: Column(
         children: const [Expanded(child: InfoBox()), ChatBox()],
       ),

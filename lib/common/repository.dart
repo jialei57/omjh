@@ -10,7 +10,10 @@ import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/quantified_item.dart';
 import 'package:omjh/entity/quest.dart';
 import 'package:omjh/entity/reward.dart';
+import 'package:omjh/entity/skill.dart';
 import 'package:path_provider/path_provider.dart';
+
+import '../entity/npc.dart';
 
 class Repository {
   final ApiHelper _helper = ApiHelper();
@@ -109,6 +112,23 @@ class Repository {
       Get.rawSnackbar(message: 'Connection Failed');
     }
     return null;
+  }
+
+  Future getNpcSkills(Npc npc) async {
+    try {
+      dynamic json = await _helper.get('npc-skills/${npc.id}');
+
+      if (json == null) {
+        return false;
+      }
+
+      npc.skills = (json as List).map((i) => Skill.fromJson(i)).toList();
+
+      return true;
+    } on SocketException {
+      Get.rawSnackbar(message: 'Connection Failed');
+    }
+    return false;
   }
 
   // Future sendMessage(Message message) async {

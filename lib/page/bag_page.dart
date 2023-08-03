@@ -113,7 +113,7 @@ class _BagPageState extends State<BagPage> {
       return const SizedBox.shrink();
     }
 
-    return Text(items[_selectedIndex].item.info['description'],
+    return Text(items[_selectedIndex].item.description,
         style: ThemeStyle.textStyle.copyWith(fontSize: 15));
   }
 

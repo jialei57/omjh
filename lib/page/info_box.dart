@@ -15,6 +15,8 @@ import 'package:omjh/entity/spot.dart';
 import 'package:omjh/page/fight_page.dart';
 import 'package:omjh/page/map_page.dart';
 
+import '../common/loading_dialog.dart';
+
 enum MoveDirection { up, down, left, right, none }
 
 class InfoBox extends StatefulWidget {
@@ -38,15 +40,19 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   late final AnimationController _animationController;
   late Animation<Offset> _offsetAnimation;
   var moveDirection = MoveDirection.none;
+  late LoadingDialog _loadingDialog;
   Spot? nextSpot;
   Interactable? _selectedObject;
   Tween<Offset> offset =
       Tween<Offset>(begin: Offset.zero, end: const Offset(0.0, 0.0));
-
+  late final AnimationController _dialogController =
+      AnimationController(vsync: this, duration: const Duration(seconds: 2))
+        ..repeat();
   @override
   void initState() {
     super.initState();
     _bloc.lookAtMap();
+    _loadingDialog = LoadingDialog(context, _dialogController);
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: this,
@@ -74,6 +80,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    _dialogController.dispose();
     super.dispose();
   }
 
@@ -235,15 +242,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
           case 'kill':
             Npc? npc = _selectedObject as Npc?;
             if (npc == null) return;
-            setState(() {
-              _selectedObject = null;
-            });
-            Get.to(() => const FightPage(),
-                arguments: {
-                  'own': [json.encode(shared.currentCharacter)],
-                  'npcs': [json.encode(npc)]
-                },
-                fullscreenDialog: true);
+            prepareFight(npc);
             break;
           case 'collect':
           case 'chop':
@@ -284,6 +283,21 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  prepareFight(Npc npc) async {
+    _loadingDialog.show();
+     await _bloc.getNpcSkills(npc);
+    _loadingDialog.dismiss();
+    setState(() {
+      _selectedObject = null;
+    });
+    Get.to(() => const FightPage(),
+        arguments: {
+          'npcs': [json.encode(npc)]
+        },
+        fullscreenDialog: true);
+    return;
   }
 
   killNpc(int nid) async {
@@ -407,7 +421,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
             }
             _bloc.moveToMap(spot.id);
 
-            Future.delayed(const Duration(milliseconds: 3000), () {
+            Future.delayed(const Duration(milliseconds: 2000), () {
               if (shared.currentCharacter!.map == spot.id) {
                 _bloc.lookAtMap();
               }

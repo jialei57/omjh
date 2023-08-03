@@ -36,6 +36,10 @@ class InfoBoxBloc implements Bloc {
     return await _repository.killedNpc(shared.currentCharacter!.id!, nids);
   }
 
+  Future getNpcSkills(Npc npc) async {
+    return await _repository.getNpcSkills(npc);
+  }
+
   void addInfoMessage(String msg) {
     if (msg.isEmpty) {
       return;
@@ -51,7 +55,7 @@ class InfoBoxBloc implements Bloc {
     npcs.clear();
     shared.currentCharacter!.map = mapId;
     Future.delayed(const Duration(milliseconds: 500), () {
-      actionCableHelper.usunsubscribeAllOldMapChanels(mapId);
+      actionCableHelper.unsunsubscribeAllOldMapChanels(mapId);
     });
   }
 

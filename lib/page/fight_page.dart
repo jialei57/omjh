@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
@@ -7,13 +8,15 @@ import 'package:get/get.dart';
 import 'package:omjh/bloc/fight_bloc.dart';
 import 'package:omjh/common/common.dart';
 import 'package:omjh/common/loading_dialog.dart';
+import 'package:omjh/common/progress_button.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/fighter.dart';
 import 'package:omjh/entity/hit_result.dart';
 import 'package:omjh/entity/npc.dart';
 import 'package:omjh/entity/reward.dart';
-import 'package:omjh/lib/puring_hour_glass.dart';
+
+import '../common/shared.dart';
 
 enum FightStatus { fighting, win, lose, escaped }
 
@@ -23,7 +26,8 @@ class FightPage extends StatefulWidget {
   @override
   State<FightPage> createState() => _FightPageState();
 }
-class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
+
+class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
   double fightBoxHeight = 0;
   double controlBoxHeight = 130;
   double controlWidth = 90;
@@ -31,9 +35,14 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
   double paddingTop = 8;
   double fighterWidth = 0;
   double fighterHeight = 80;
+  late Fighter me;
   List<Fighter> own = [];
   List<Fighter> enemies = [];
+  bool _controlDisabled = true;
+  Queue<Fighter> fighterQueue = Queue();
   Reward? reward;
+  int _selectedSkillId = 0;
+  final shared = Get.put(Shared());
   final FightBloc _bloc = FightBloc();
   FightStatus _status = FightStatus.fighting;
   late LoadingDialog _loadingDialog;
@@ -47,25 +56,43 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
     _loadingDialog = LoadingDialog(context, _loadingController);
 
     dynamic argumentData = Get.arguments;
-    dynamic ownJson = json.decode(argumentData['own'].toString());
-    List<Character> ownChars =
-        (ownJson as List).map((i) => Character.fromJson(i)).toList();
-    for (var element in ownChars) {
-      own.add(Fighter(element, true));
-    }
+    List<Fighter> all = [];
+    me = Fighter(shared.currentCharacter!, true);
+    own.add(me);
+    all.add(me);
 
     dynamic npcJson = json.decode(argumentData['npcs'].toString());
     List<Npc> npcs = (npcJson as List).map((i) => Npc.fromJson(i)).toList();
     for (var element in npcs) {
-      enemies.add(Fighter(element, false));
+      Fighter f = Fighter(element, false);
+      enemies.add(f);
+      all.add(f);
     }
 
-    for (var e in own) {
+    all.sort(((a, b) => a.getSpeed().compareTo(b.getSpeed())));
+    fighterQueue.addAll(all);
+
+    for (var e in all) {
       initFighter(e);
     }
+    nextRound();
+  }
 
-    for (var e in enemies) {
-      initFighter(e);
+  void nextRound() {
+    final fighter = fighterQueue.removeFirst();
+    fighterQueue.add(fighter);
+    Future.delayed(const Duration(milliseconds: 500), () {
+      prepareFight(fighter);
+    });
+  }
+
+  void prepareFight(Fighter fighter) {
+    if (!fighter.isOwnSide) {
+      fighter.actionController?.forward();
+    } else {
+      setState(() {
+        _controlDisabled = false;
+      });
     }
   }
 
@@ -77,7 +104,7 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
     }
 
     AnimationController actionController = AnimationController(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
     actionController.addStatusListener((status) {
@@ -85,7 +112,7 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
         actionController.reset();
         if (_status == FightStatus.fighting) {
           hit(fighter);
-          fighter.timeController?.forward();
+          // fighter.timeController?.forward();
         }
       }
     });
@@ -96,29 +123,29 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
     });
     fighter.actionController = actionController;
 
-    AnimationController timeController = AnimationController(
-      duration: Duration(milliseconds: fighter.getAttackTime()),
-      vsync: this,
-    );
-    timeController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        if (_status == FightStatus.fighting) {
-          timeController.reset();
-          fighter.actionController?.forward();
-        }
-      }
-    });
-    timeController.addListener(() {
-      if (_status != FightStatus.fighting) {
-        timeController.stop();
-      }
-    });
-    fighter.timeController = timeController;
-    if (fighter.isOwnSide) {
-      timeController.forward(from: 0.5);
-    } else {
-      timeController.forward();
-    }
+    // AnimationController timeController = AnimationController(
+    //   duration: Duration(milliseconds: fighter.getAttackTime()),
+    //   vsync: this,
+    // );
+    // timeController.addStatusListener((status) {
+    //   if (status == AnimationStatus.completed) {
+    //     if (_status == FightStatus.fighting) {
+    //       timeController.reset();
+    //       fighter.actionController?.forward();
+    //     }
+    //   }
+    // });
+    // timeController.addListener(() {
+    //   if (_status != FightStatus.fighting) {
+    //     timeController.stop();
+    //   }
+    // });
+    // fighter.timeController = timeController;
+    // if (fighter.isOwnSide) {
+    //   timeController.forward(from: 0.5);
+    // } else {
+    //   timeController.forward();
+    // }
 
     Animation<Offset> offsetAnimation = offset.animate(CurvedAnimation(
       parent: actionController,
@@ -129,13 +156,8 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    for (var e in own) {
+    for (var e in fighterQueue) {
       e.actionController?.dispose();
-      e.timeController?.dispose();
-    }
-    for (var e in enemies) {
-      e.actionController?.dispose();
-      e.timeController?.dispose();
     }
     _loadingController.dispose();
     super.dispose();
@@ -154,7 +176,12 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
     }
 
     setState(() {
-      HitResult result = from.getHitResult(to!);
+      HitResult result;
+      if (from == me) {
+        result = from.getHitResult(to!, skill: _selectedSkillId);
+      } else {
+        result = from.getHitResult(to!);
+      }
       _bloc.infoMessages.insert(0, result.description);
 
       if (result.hitted) {
@@ -174,6 +201,8 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
         }
       }
     });
+
+    nextRound();
   }
 
   Future _updateFightResult(List<int> nids) async {
@@ -194,8 +223,18 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
     fighterHeight = (fightBoxHeight - paddingTop * 4) / 3;
     fighterWidth = (MediaQuery.of(context).size.width - 60) / 2;
     return Scaffold(
-      body: Column(
-        children: [_buildFightBox(), _buildInfoBox(), _buildControlBox()],
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: const AssetImage("assets/image/ic_village.png"),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(0.2), BlendMode.dstATop),
+          ),
+        ),
+        child: Column(
+          children: [_buildFightBox(), _buildInfoBox(), _buildControlBox()],
+        ),
       ),
     );
   }
@@ -265,21 +304,28 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              fighter.isOwnSide
-                  ? Padding(
-                      padding:
-                          EdgeInsets.fromLTRB(0, fighterHeight / 3, 24, 10),
-                      child: _buildTimeControl(fighter),
-                    )
-                  : const SizedBox.shrink(),
+              // fighter.isOwnSide
+              //     ? Padding(
+              //         padding:
+              //             EdgeInsets.fromLTRB(0, fighterHeight / 3, 24, 10),
+              //         child: _buildTimeControl(fighter),
+              //       )
+              //     : const SizedBox.shrink(),
               SlideTransition(
                 position: fighter.animation!,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      fighter.char.getName(),
-                      style: ThemeStyle.textStyle.copyWith(fontSize: 15),
+                    // Text(
+                    //   fighter.char.getName(),
+                    //   style: ThemeStyle.textStyle.copyWith(fontSize: 15),
+                    // ),
+                    // const SizedBox(
+                    //   height: 2,
+                    // ),
+                    Image(
+                      image: AssetImage('assets/image/$icon'),
+                      width: fighterHeight / 1.8,
                     ),
                     Container(
                       padding: const EdgeInsets.only(top: 5),
@@ -309,22 +355,15 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
                             ),
                           )
                         : const SizedBox.shrink(),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Image(
-                      image: AssetImage('assets/image/$icon'),
-                      width: fighterHeight / 1.8,
-                    ),
                   ],
                 ),
               ),
-              !fighter.isOwnSide
-                  ? Padding(
-                      padding:
-                          EdgeInsets.fromLTRB(24, fighterHeight / 3, 0, 10),
-                      child: _buildTimeControl(fighter))
-                  : const SizedBox.shrink(),
+              // !fighter.isOwnSide
+              //     ? Padding(
+              //         padding:
+              //             EdgeInsets.fromLTRB(24, fighterHeight / 3, 0, 10),
+              //         child: _buildTimeControl(fighter))
+              //     : const SizedBox.shrink(),
             ],
           ),
         ),
@@ -333,19 +372,19 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildTimeControl(Fighter fighter) {
-    return Column(
-      children: [
-        const Spacer(),
-        SpinKitPouringHourGlass(
-          color: ThemeStyle.bgColor,
-          strokeWidth: 1,
-          size: 36,
-          controller: fighter.timeController,
-        ),
-      ],
-    );
-  }
+  // Widget _buildTimeControl(Fighter fighter) {
+  //   return Column(
+  //     children: [
+  //       const Spacer(),
+  //       SpinKitPouringHourGlass(
+  //         color: ThemeStyle.bgColor,
+  //         strokeWidth: 1,
+  //         size: 36,
+  //         controller: fighter.timeController,
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildHitText(Fighter fighter) {
     if (fighter.hitText == null) {
@@ -400,45 +439,63 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
   Widget _buildControlBox() {
     return Stack(
       children: [
-        Container(
-          width: double.infinity,
-          height: controlBoxHeight,
-          margin: EdgeInsets.fromLTRB(
-              8, 0, 8, MediaQuery.of(context).padding.bottom + 5),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-              color: Colors.transparent,
-              border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
-              borderRadius: const BorderRadius.all(Radius.circular(8))),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildControl(null),
-                    _buildControl(null),
-                    _buildControl(null)
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildControl(null),
-                    _buildControl(null),
-                    _buildControl(null)
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildControl(null),
-                    _buildControl(null),
-                    _buildControl('逃跑')
-                  ],
-                )
-              ]),
+        IgnorePointer(
+          ignoring: _controlDisabled,
+          child: Container(
+            width: double.infinity,
+            height: controlBoxHeight,
+            margin: EdgeInsets.fromLTRB(
+                8, 0, 8, MediaQuery.of(context).padding.bottom + 5),
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+                color: Colors.transparent,
+                border: Border.all(color: ThemeStyle.bgColor, width: 1.5),
+                borderRadius: const BorderRadius.all(Radius.circular(8))),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildControl('attack'),
+                      _buildControl(null),
+                      _buildControl(null)
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildControl(null),
+                      _buildControl(null),
+                      _buildControl(null)
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildControl(null),
+                      _buildControl(null),
+                      // _buildControl('escape')
+                      ProgressBarButton(
+                          width: controlWidth,
+                          height: controlHeight,
+                          text: 'escape'.tr,
+                          onCompleted: () => Navigator.pop(context)),
+                    ],
+                  )
+                ]),
+          ),
         ),
+        if (_controlDisabled)
+          Container(
+            width: double.infinity,
+            height: controlBoxHeight,
+            margin: EdgeInsets.fromLTRB(
+                8, 0, 8, MediaQuery.of(context).padding.bottom + 5),
+            decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                borderRadius: const BorderRadius.all(Radius.circular(8))),
+          ),
         _status != FightStatus.fighting
             ? GestureDetector(
                 onTap: () => Navigator.pop(context),
@@ -481,9 +538,9 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
     }
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 5, 20, 10),
-      child:  Text(text,
-            style: ThemeStyle.textStyle
-                .copyWith(fontSize: 16, color: Colors.white)),
+      child: Text(text,
+          style:
+              ThemeStyle.textStyle.copyWith(fontSize: 16, color: Colors.white)),
     );
   }
 
@@ -491,16 +548,29 @@ class _FightPageState extends State<FightPage>  with TickerProviderStateMixin {
     if (name == null) {
       return SizedBox(width: controlWidth, height: controlHeight);
     }
-    return Container(
-      width: controlWidth,
-      height: controlHeight,
-      decoration: BoxDecoration(
-          color: ThemeStyle.unselectedColor,
-          border: Border.all(color: ThemeStyle.bgColor, width: 2)),
-      child: Center(
-          child: Text(name,
-              style: ThemeStyle.textStyle
-                  .copyWith(fontSize: 16, color: Colors.white))),
+    return GestureDetector(
+      onTap: () {
+        switch (name) {
+          case 'attack':
+            setState(() {
+              _controlDisabled = true;
+              _selectedSkillId = 0;
+              me.actionController?.forward();
+            });
+            break;
+        }
+      },
+      child: Container(
+        width: controlWidth,
+        height: controlHeight,
+        decoration: BoxDecoration(
+            color: ThemeStyle.unselectedColor,
+            border: Border.all(color: ThemeStyle.bgColor, width: 2)),
+        child: Center(
+            child: Text(name.tr,
+                style: ThemeStyle.textStyle
+                    .copyWith(fontSize: 16, color: Colors.white))),
+      ),
     );
   }
 }

@@ -15,7 +15,7 @@ class Fighter {
   bool isOwnSide;
   Animation<Offset>? animation;
   AnimationController? actionController;
-  AnimationController? timeController;
+  // AnimationController? timeController;
   String? hitText;
 
   Fighter(this.char, this.isOwnSide) {
@@ -23,8 +23,12 @@ class Fighter {
     mpLeft = char.getMaxMp();
   }
 
-  int getAttackTime() {
-    return (3000 / (1000 + char.getSpeed()) * 1000).round();
+  // int getAttackTime() {
+  //   return (3000 / (1000 + char.getSpeed()) * 1000).round();
+  // }
+
+  int getSpeed() {
+    return char.getSpeed();
   }
 
   int getHit(Fighter to) {
@@ -37,16 +41,17 @@ class Fighter {
     return (char.getAttack() * (Random().nextInt(50) + 50) / 100.0).round();
   }
 
-  HitResult getHitResult(Fighter to) {
+  HitResult getHitResult(Fighter to, {int skill = 0}) {
     HitResult result = HitResult();
     int hit = getHit(to);
     String attackLine = '';
     if (char is Character) {
-      attackLine = 'uses'.tr + 'normal_attack'.tr;
+      if (skill == 0) {
+        attackLine = 'normal_attack'.tr;
+      }
     } else if (char is Npc) {
       Npc npc = char as Npc;
-      attackLine = ((npc.type == 'animal') ? '' : 'uses'.tr) +
-          npc.info!['normal_attack'];
+      attackLine = npc.info!['normal_attack'];
     }
     result.description = char.getName() +
         'attack_on'
@@ -57,7 +62,8 @@ class Fighter {
     } else {
       result.hitted = true;
       result.damage = getDamage(to);
-      result.description += 'get_damage'.trParams({'target': to.char.getName(), 'damage': result.damage.toString()});
+      result.description += 'get_damage'.trParams(
+          {'target': to.char.getName(), 'damage': result.damage.toString()});
     }
 
     return result;

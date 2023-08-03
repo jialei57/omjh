@@ -105,7 +105,7 @@ class ActionCableHelper {
     }
   }
 
-  void usunsubscribeAllOldMapChanels(int currentMap) {
+  void unsunsubscribeAllOldMapChanels(int currentMap) {
     final channleId = 'Map_$currentMap';
     subscribers.keys
         .where((key) => key.startsWith('Map') && key != channleId)
