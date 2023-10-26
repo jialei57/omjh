@@ -23,8 +23,8 @@ class _JiangHuPageState extends State<JiangHuPage> with AutomaticKeepAliveClient
             colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.dstATop),
           ),
         ),
-      child: Column(
-        children: const [Expanded(child: InfoBox()), ChatBox()],
+      child: const Column(
+        children: [Expanded(child: InfoBox()), ChatBox()],
       ),
     );
   }

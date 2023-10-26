@@ -10,7 +10,7 @@ import 'package:omjh/common/common.dart';
 import 'package:omjh/common/loading_dialog.dart';
 import 'package:omjh/common/progress_button.dart';
 import 'package:omjh/common/theme_style.dart';
-import 'package:omjh/entity/character.dart';
+// import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/fighter.dart';
 import 'package:omjh/entity/hit_result.dart';
 import 'package:omjh/entity/npc.dart';
