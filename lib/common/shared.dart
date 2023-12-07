@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:omjh/common/action_cable_helper.dart';
 import 'package:omjh/common/common.dart';
 import 'package:omjh/entity/character.dart';
+import 'package:omjh/entity/npc.dart';
 import 'package:omjh/entity/quantified_item.dart';
 import 'package:omjh/entity/quest.dart';
 import 'package:omjh/entity/spot.dart';
@@ -24,12 +25,24 @@ class Shared {
   Quest? getRelatedQuest(int npcId) {
     if (quests.isEmpty) return null;
     for (var e in quests) {
-      var goals = e.goals;
-      if (goals['npc'] == npcId.toString()) {
+      if (e.endNPC == npcId) {
         return e;
       }
     }
 
+    return null;
+  }
+
+  Quest? getStartQuest(Npc npc) {
+    if (npc.startQuests == null || npc.startQuests!.isEmpty) {
+      return null;
+    }
+    for (var q in npc.startQuests!) {
+      if (!(currentCharacter!.status!['processingQuests'] as List)
+              .contains(q.id) &&
+          !(currentCharacter!.status!['completedQuests'] as List)
+              .contains(q.id)) return q;
+    }
     return null;
   }
 
@@ -56,7 +69,7 @@ class Shared {
       return;
     }
 
-    for (var i = 1; i < fields.length; i++) {
+    for (var i = 2; i < fields.length; i++) {
       List<dynamic> raw = fields[i];
       Map<String, dynamic> infoJson =
           json.decode((raw[8] as String).replaceAll("'", "\""));

@@ -55,6 +55,8 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
     super.initState();
     _loadingDialog = LoadingDialog(context, _loadingController);
 
+    _bloc.infoMessages.insert(0, 'battle_start'.tr);
+
     dynamic argumentData = Get.arguments;
     List<Fighter> all = [];
     me = Fighter(shared.currentCharacter!, true);
@@ -69,7 +71,7 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
       all.add(f);
     }
 
-    all.sort(((a, b) => a.getSpeed().compareTo(b.getSpeed())));
+    all.sort(((a, b) => b.getSpeed().compareTo(a.getSpeed())));
     fighterQueue.addAll(all);
 
     for (var e in all) {
@@ -530,8 +532,9 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
 
   Widget _buildRewards() {
     if (reward == null) return const SizedBox.shrink();
-
     var items = reward!.items;
+    if (reward!.items.isEmpty) return const SizedBox.shrink();
+
     String text = 'obtained'.tr;
     for (var item in items) {
       text += ' ${item.item.name}x${item.quantity}';

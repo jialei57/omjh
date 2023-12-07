@@ -4,7 +4,7 @@ import 'package:omjh/common/shared.dart';
 import 'package:omjh/common/theme_style.dart';
 import 'package:omjh/entity/quantified_item.dart';
 
-enum ItemType { equipment, other }
+enum ItemType { equipment, other, quest }
 
 class BagPage extends StatefulWidget {
   const BagPage({super.key});
@@ -17,13 +17,16 @@ class _BagPageState extends State<BagPage> {
   final shared = Get.put(Shared());
   int _selectedIndex = 0;
   int _selectedTypeIndex = 0;
-  ItemType _selectedType = ItemType.equipment;
+  ItemType _selectedType = ItemType.other;
   List<QuantifiedItem> items = [];
 
   @override
   void initState() {
     items = shared.items
-        .where((element) => element.item.itemType == _selectedType.toString())
+        .where((element) =>
+            element.item.itemType == _selectedType.name ||
+            (element.item.itemType == ItemType.quest.name &&
+                _selectedType == ItemType.other))
         .toList();
 
     super.initState();
@@ -33,6 +36,7 @@ class _BagPageState extends State<BagPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(children: [
+        _buildMoneyBox(),
         _buildDescriptionBox(),
         Expanded(
           child: _buildItemList(),
@@ -44,9 +48,9 @@ class _BagPageState extends State<BagPage> {
           currentIndex: _selectedTypeIndex,
           items: [
             BottomNavigationBarItem(
-                icon: const Icon(Icons.home), label: 'equipment'.tr),
-            BottomNavigationBarItem(
                 icon: const Icon(Icons.home), label: 'other_item'.tr),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.home), label: 'equipment'.tr),
           ],
           selectedIconTheme: const IconThemeData(opacity: 0.0, size: 0),
           unselectedIconTheme: const IconThemeData(opacity: 0.0, size: 0),
@@ -62,17 +66,17 @@ class _BagPageState extends State<BagPage> {
               _selectedTypeIndex = index;
               switch (index) {
                 case 0:
-                  _selectedType = ItemType.equipment;
+                  _selectedType = ItemType.other;
                   break;
                 case 1:
-                  _selectedType = ItemType.other;
+                  _selectedType = ItemType.equipment;
                   break;
                 default:
                   _selectedType = ItemType.other;
               }
               items = shared.items
-                  .where((element) =>
-                      element.item.itemType == _selectedType.name)
+                  .where(
+                      (element) => element.item.getType() == _selectedType.name)
                   .toList();
               _selectedIndex = 0;
             });
@@ -80,6 +84,16 @@ class _BagPageState extends State<BagPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildMoneyBox() {
+    return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.all(4.0),
+        padding: const EdgeInsets.all(4.0),
+        child: Text(
+            '${'money'.tr}: ${shared.currentCharacter!.status!['money']}',
+            style: ThemeStyle.textStyle.copyWith(fontSize: 15)));
   }
 
   Widget _buildDescriptionBox() {
@@ -105,7 +119,7 @@ class _BagPageState extends State<BagPage> {
         child: ListView.builder(
             padding: EdgeInsets.zero,
             itemCount: shared.items.length,
-            itemBuilder: ((context, index) => _buidItem(index))));
+            itemBuilder: ((context, index) => _buildItem(index))));
   }
 
   Widget _buildDescription() {
@@ -113,11 +127,18 @@ class _BagPageState extends State<BagPage> {
       return const SizedBox.shrink();
     }
 
-    return Text(items[_selectedIndex].item.description,
-        style: ThemeStyle.textStyle.copyWith(fontSize: 15));
+    var item = items[_selectedIndex];
+    var text = item.item.description;
+    if (item.item.getType() == 'equipment') {
+      for (String key in item.item.properties.keys) {
+        text += "\n\n${key.tr} +${item.item.properties[key]}";
+      }
+    }
+
+    return Text(text, style: ThemeStyle.textStyle.copyWith(fontSize: 15));
   }
 
-  Widget _buidItem(int index) {
+  Widget _buildItem(int index) {
     if (index >= items.length) {
       return const SizedBox.shrink();
     }

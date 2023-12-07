@@ -32,7 +32,7 @@ class Fighter {
   }
 
   int getHit(Fighter to) {
-    return (((char.getHit() - to.char.getDodge()) / to.char.getDodge() + 0.8) *
+    return (((char.getHit() - to.char.getDodge()) / (to.char.getDodge()+0.01) + 0.8) *
             100)
         .round();
   }

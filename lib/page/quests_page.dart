@@ -32,7 +32,7 @@ class _QuestsState extends State<QuestsPage> {
           padding: EdgeInsets.fromLTRB(verticalPadding, 20, verticalPadding, 0),
           child: Row(
             children: [
-              Text('${quest.name}(${'main'.tr})',
+              Text(quest.name,
                   style: ThemeStyle.textStyle
                       .copyWith(fontSize: 20, fontWeight: FontWeight.w700)),
               Expanded(
@@ -56,7 +56,8 @@ class _QuestsState extends State<QuestsPage> {
 
   Widget _buildCollection(Quest quest) {
     var items = quest.itemsNeeded();
-    if (items.isEmpty) {
+    var mobs = quest.mobsNeeded();
+    if (items.isEmpty && mobs.isEmpty) {
       return const SizedBox(
         height: 20,
       );
@@ -75,6 +76,20 @@ class _QuestsState extends State<QuestsPage> {
           quantity >= item.quantity ? ' (${'completed'.tr})' : '';
       itemTexts.add(
         Text('- $quantity/${item.quantity} ${item.item.name} $completed',
+            style: ThemeStyle.textStyle.copyWith(fontSize: 16)),
+      );
+    }
+
+    var processingQuest =
+        (shared.currentCharacter!.status!['processingQuests'] as List)
+            .firstWhere((e) => e['id'] == quest.id);
+
+    for (var mob in mobs) {
+      var alreadyKill = (processingQuest['kills'] as List).firstWhere((e) => e['name'] == mob.name)['quantity'];
+      String completed =
+          alreadyKill >= mob.quantity ? ' (${'completed'.tr})' : '';
+      itemTexts.add(
+        Text('- $alreadyKill/${mob.quantity} ${mob.name} $completed',
             style: ThemeStyle.textStyle.copyWith(fontSize: 16)),
       );
     }

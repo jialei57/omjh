@@ -9,6 +9,9 @@ import 'package:omjh/entity/character.dart';
 import 'package:omjh/entity/npc.dart';
 import 'package:omjh/entity/reward.dart';
 
+import '../entity/quest.dart';
+import '../entity/skill.dart';
+
 class InfoBoxBloc implements Bloc {
   final Repository _repository = Get.put(Repository());
   final shared = Get.put(Shared());
@@ -28,16 +31,20 @@ class InfoBoxBloc implements Bloc {
         'Map', {'id': char.map, 'charId': char.id}, onMessage);
   }
 
-  Future completeQuest(int cid, int qid) async {
-    await _repository.compeleteQuest(cid, qid);
+  Future<Reward?> completeQuest(int cid, int qid) async {
+    return await  _repository.compeleteQuest(cid, qid);
+  }
+
+  Future acceptQuest(int cid, int qid) async {
+    await _repository.acceptQuest(cid, qid);
   }
 
   Future<Reward?> killedNpc(List<int> nids) async {
     return await _repository.killedNpc(shared.currentCharacter!.id!, nids);
   }
 
-  Future getNpcSkills(Npc npc) async {
-    return await _repository.getNpcSkills(npc);
+  Future getNpcRelated(Npc npc) async {
+    return await _repository.getNpcRelated(npc);
   }
 
   void addInfoMessage(String msg) {
@@ -78,9 +85,16 @@ class InfoBoxBloc implements Bloc {
           .toList();
       allPlayers
           .removeWhere((element) => element.id == shared.currentCharacter!.id);
-      final allNpcs = (json.decode(msg['npcs']) as List)
-          .map((i) => Npc.fromJson(i))
+      final allNpcs = (json.decode(msg['npcs_with_related']) as List)
+          .map((i) {
+            Npc npc = Npc.fromJson(i['npc']);
+            npc.startQuests = (i['start_quests'] as List).map((questJson) => Quest.fromJson(questJson)).toList();
+            npc.endQuests = (i['end_quests'] as List).map((questJson) => Quest.fromJson(questJson)).toList();
+            npc.skills = (i['skills'] as List).map((skillJson) => Skill.fromJson(skillJson)).toList();
+            return npc;
+          })
           .toList();
+
       players.replaceRange(0, players.length, allPlayers);
       npcs.replaceRange(0, npcs.length, allNpcs);
       return;

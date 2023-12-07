@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:csv/csv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -34,6 +35,47 @@ class Repository {
     return 0;
   }
 
+  Future<int> getRemoteMapVersion() async {
+    try {
+      final jsonData = await _helper.get('map-version');
+      if (jsonData == null) {
+        return 0;
+      }
+
+      return jsonData['version'];
+    } on SocketException catch (e) {
+      logger.d(e);
+      Get.rawSnackbar(message: 'Connection Failed');
+    }
+    return 0;
+  }
+
+  Future<int> getLocalMapVersion() async {
+    final Directory appDocumentsDirectory =
+        await getApplicationDocumentsDirectory();
+    final String appDocumentsPath = appDocumentsDirectory.path;
+    final String filePath = '$appDocumentsPath/map.csv';
+
+    final File file = File(filePath);
+    final bool exists = await file.exists();
+
+    if (!exists) {
+      return -1; // or throw an exception, depending on your use case
+    }
+
+    final input = file.openRead();
+    final fields = await input
+        .transform(utf8.decoder)
+        .transform(const CsvToListConverter())
+        .toList();
+
+    if (fields.length < 2) {
+      return 0;
+    }
+
+    return fields[0][0];
+  }
+
   Future<bool> getMapFile() async {
     try {
       final Directory appDocumentsDirectory =
@@ -45,7 +87,11 @@ class Repository {
       final bool exist = await file.exists();
 
       if (exist) {
-        return true;
+        int localMapVersion = await getLocalMapVersion();
+        int remoteMapVersion = await getRemoteMapVersion();
+        if (localMapVersion >= remoteMapVersion) {
+          return true;
+        }
       }
 
       final String content = await _helper.get('map', contentType: 'text/csv');
@@ -114,15 +160,20 @@ class Repository {
     return null;
   }
 
-  Future getNpcSkills(Npc npc) async {
+  Future getNpcRelated(Npc npc) async {
     try {
-      dynamic json = await _helper.get('npc-skills/${npc.id}');
+      dynamic json = await _helper.get('npc-related/${npc.id}');
 
       if (json == null) {
         return false;
       }
 
-      npc.skills = (json as List).map((i) => Skill.fromJson(i)).toList();
+      npc.skills =
+          (json['skills'] as List).map((i) => Skill.fromJson(i)).toList();
+      npc.startQuests =
+          (json['startQuests'] as List).map((i) => Quest.fromJson(i)).toList();
+      npc.endQuests =
+          (json['endQuests'] as List).map((i) => Quest.fromJson(i)).toList();
 
       return true;
     } on SocketException {
@@ -149,10 +200,10 @@ class Repository {
   //   return null;
   // }
 
-  Future compeleteQuest(int cid, int qid) async {
+  Future acceptQuest(int cid, int qid) async {
     try {
       final jsonData =
-          await _helper.put('complete-quest', '{"id":"$cid","qid":"$qid"}');
+          await _helper.put('accept-quest', '{"id":"$cid","qid":"$qid"}');
       if (jsonData == null) {
         return null;
       }
@@ -163,6 +214,28 @@ class Repository {
       await getQuests();
 
       return;
+    } on SocketException {
+      Get.rawSnackbar(message: 'Connection Failed');
+    }
+    return null;
+  }
+
+  Future<Reward?> compeleteQuest(int cid, int qid) async {
+    try {
+      final jsonData =
+          await _helper.put('complete-quest', '{"id":"$cid","qid":"$qid"}');
+      if (jsonData == null) {
+        return null;
+      }
+
+      Character updated = Character.fromJson(jsonData['char']);
+      shared.currentCharacter = updated;
+
+      await getQuests();
+      await getItems();
+
+      Reward reward = Reward.fromJson(jsonData['reward']);
+      return reward;
     } on SocketException {
       Get.rawSnackbar(message: 'Connection Failed');
     }

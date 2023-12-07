@@ -15,6 +15,10 @@ class Common {
     switch (id) {
       case 3:
         return 'ic_chicken.png';
+      case 7:
+        return 'ic_wolf.png';
+         case 8:
+        return 'ic_boar.png';
       default:
         return 'ic_not_found.png';
     }

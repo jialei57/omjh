@@ -71,6 +71,8 @@ class AppTranslation extends Translations {
           'collect': 'Collect',
           'chop': 'Chop',
           'escape': 'Escape',
+          'money': 'Money',
+          'battle_start': 'Battle started',
         },
         'zh_CN': {
           'jianghu': '仙途',
@@ -139,6 +141,8 @@ class AppTranslation extends Translations {
           'collect': '采摘',
           'chop': '砍',
           'escape': '逃跑',
+          'money': '金钱',
+          'battle_start': '战斗开始',
         }
       };
 }

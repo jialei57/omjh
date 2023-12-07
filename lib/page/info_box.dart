@@ -15,8 +15,6 @@ import 'package:omjh/entity/spot.dart';
 import 'package:omjh/page/fight_page.dart';
 import 'package:omjh/page/map_page.dart';
 
-import '../common/loading_dialog.dart';
-
 enum MoveDirection { up, down, left, right, none }
 
 class InfoBox extends StatefulWidget {
@@ -40,7 +38,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   late final AnimationController _animationController;
   late Animation<Offset> _offsetAnimation;
   var moveDirection = MoveDirection.none;
-  late LoadingDialog _loadingDialog;
+  // late LoadingDialog _loadingDialog;
   Spot? nextSpot;
   Interactable? _selectedObject;
   Tween<Offset> offset =
@@ -52,7 +50,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _bloc.lookAtMap();
-    _loadingDialog = LoadingDialog(context, _dialogController);
+    // _loadingDialog = LoadingDialog(context, _dialogController);
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: this,
@@ -72,7 +70,9 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
       curve: Curves.fastOutSlowIn,
     ));
 
-    if (shared.quests.firstWhereOrNull((element) => element.id == 1) != null) {
+    if ((shared.currentCharacter!.status!['processingQuests'] as List)
+            .isEmpty &&
+        (shared.currentCharacter!.status!['completedQuests'] as List).isEmpty) {
       _bloc.addInfoMessage('you_are_hungry'.tr);
     }
   }
@@ -206,6 +206,39 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
     return buttons;
   }
 
+  Future _checkNPCQuests(Npc npc) async {
+    Quest? quest = shared.getRelatedQuest(npc.id ?? -1);
+    if (quest != null) {
+      if (quest.canComplete()) {
+        _bloc.addInfoMessage('${npc.name}: ${quest.endLine}');
+        var rewards =
+            await _bloc.completeQuest(shared.currentCharacter!.id!, quest.id);
+        if (rewards == null) return;
+        if (rewards.money != 0) {
+          _bloc.addInfoMessage(
+              '${'obtained'.tr} ${'money'.tr}x${quest.rewards['money']}');
+        }
+        if (rewards.items.isNotEmpty) {
+          String text = 'obtained'.tr;
+          for (var item in rewards.items) {
+            text += ' ${item.item.name}x${item.quantity}';
+          }
+          _bloc.addInfoMessage(text);
+        }
+      } else {
+        _bloc.addInfoMessage('${npc.name}: ${quest.midLine}');
+      }
+    } else {
+      Quest? quest = shared.getStartQuest(npc);
+      if (quest != null) {
+        _bloc.addInfoMessage('${npc.name}: ${quest.startLine}');
+        _bloc.acceptQuest(shared.currentCharacter!.id!, quest.id);
+      } else {
+        _bloc.addInfoMessage('${npc.name}: ${npc.getNextDialog()}');
+      }
+    }
+  }
+
   Widget _buildActionButton(String action) {
     return GestureDetector(
       onTap: () {
@@ -220,23 +253,9 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
               Npc? npc = _selectedObject as Npc?;
               if (npc == null) return;
 
-              Quest? quest = shared.getRelatedQuest(npc.id ?? -1);
-              if (quest != null) {
-                if (quest.canComplete()) {
-                  _bloc.addInfoMessage(
-                      '${npc.name}: ${quest.goals['line2'] ?? ''}');
-                  _bloc.completeQuest(shared.currentCharacter!.id!, quest.id);
-                  if (quest.goals['aside'] != null) {
-                    _bloc.addInfoMessage(quest.goals['aside']);
-                  }
-                } else {
-                  _bloc.addInfoMessage(
-                      '${npc.name}: ${quest.goals['line1'] ?? ''}');
-                }
-              } else {
-                _bloc.addInfoMessage('${npc.name}: ${npc.getNextDialog()}');
-              }
               _selectedObject = null;
+
+              _checkNPCQuests(npc);
             });
             break;
           case 'kill':
@@ -286,9 +305,6 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   }
 
   prepareFight(Npc npc) async {
-    _loadingDialog.show();
-     await _bloc.getNpcSkills(npc);
-    _loadingDialog.dismiss();
     setState(() {
       _selectedObject = null;
     });

@@ -1,4 +1,5 @@
 import 'package:omjh/entity/interactable.dart';
+import 'package:omjh/entity/quest.dart';
 import 'package:omjh/entity/skill.dart';
 
 class Npc implements Interactable {
@@ -9,6 +10,9 @@ class Npc implements Interactable {
   final Map<String, dynamic>? status;
   final Map<String, dynamic>? info;
   List<Skill>? skills;
+  List<Quest>? startQuests;
+  List<Quest>? endQuests;
+
   int _dialogIndex = 0;
 
   Npc(this.id, this.name, this.map, this.type, this.status, this.info,
