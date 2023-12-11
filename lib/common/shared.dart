@@ -13,12 +13,15 @@ import 'package:omjh/entity/quest.dart';
 import 'package:omjh/entity/spot.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../entity/item.dart';
+
 class Shared {
   Character? currentCharacter;
   List<Character> characters = [];
   List<Spot> maps = [];
   List<Quest> quests = [];
   List<QuantifiedItem> items = [];
+  List<Item> equipments = [];
   Spot? currentMap;
   double contentHeight = 0;
 

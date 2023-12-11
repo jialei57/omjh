@@ -73,6 +73,11 @@ class AppTranslation extends Translations {
           'escape': 'Escape',
           'money': 'Money',
           'battle_start': 'Battle started',
+          'accessory': 'Accessory',
+          'artifact': 'Artifact',
+          'equip': 'Equip',
+          'not_equipped': 'Not equipped',
+          'take_off': 'Take off',
         },
         'zh_CN': {
           'jianghu': '仙途',
@@ -143,6 +148,11 @@ class AppTranslation extends Translations {
           'escape': '逃跑',
           'money': '金钱',
           'battle_start': '战斗开始',
+          'accessory': '配饰',
+          'artifact': '法宝',
+          'equip': '装备',
+          'not_equipped': '未装备',
+          'take_off': '卸下',
         }
       };
 }
