@@ -31,9 +31,10 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
   final spotHeight = 30.0;
   final spotVerticalPadding = 10;
   final spotHorizontalPadding = 20;
-  final boxHeight = 140.0;
+  final boxHeight = 130.0;
   var controlLeftPadding = 0.0;
-  var controlTopPadding = 0.0;
+  final controlTopPadding = 12.0;
+  final infoHeight = 100.0;
   final shared = Get.put(Shared());
   late final AnimationController _animationController;
   late Animation<Offset> _offsetAnimation;
@@ -116,8 +117,6 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
     final screenWidth = MediaQuery.of(context).size.width;
     controlLeftPadding =
         (screenWidth - 3 * spotWidth - 2 * spotHorizontalPadding) / 2;
-    controlTopPadding =
-        boxHeight - 3 * spotHeight - 2 * spotVerticalPadding - 8;
     return Column(
       children: [
         Expanded(
@@ -333,7 +332,7 @@ class _InfoBoxState extends State<InfoBox> with TickerProviderStateMixin {
 
   Widget _buildInfo() {
     return Container(
-        height: 100,
+        height: infoHeight,
         width: double.infinity,
         margin: const EdgeInsets.all(4.0),
         padding: const EdgeInsets.all(4.0),

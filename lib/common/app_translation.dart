@@ -78,6 +78,8 @@ class AppTranslation extends Translations {
           'equip': 'Equip',
           'not_equipped': 'Not equipped',
           'take_off': 'Take off',
+          'buy': 'Buy',
+          'sell': 'Sell',
         },
         'zh_CN': {
           'jianghu': '仙途',
@@ -153,6 +155,8 @@ class AppTranslation extends Translations {
           'equip': '装备',
           'not_equipped': '未装备',
           'take_off': '卸下',
+          'buy': '购买',
+          'sell': '出售',
         }
       };
 }

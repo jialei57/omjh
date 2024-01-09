@@ -44,9 +44,27 @@ class Shared {
       if (!(currentCharacter!.status!['processingQuests'] as List)
               .contains(q.id) &&
           !(currentCharacter!.status!['completedQuests'] as List)
-              .contains(q.id)) return q;
+              .contains(q.id) &&
+          currentCharacter!.getLevel() >= q.levelRequired &&
+          (q.preQuestRequired == 0 ||
+              (currentCharacter!.status!['completedQuests'] as List)
+                  .contains(q.preQuestRequired))) {
+        return q;
+      }
     }
     return null;
+  }
+
+  int getEquippedAttribute(String attr) {
+    int result = 0;
+    for (var item in equipments) {
+      for (String key in item.properties.keys) {
+        if (key == attr) {
+          result += item.properties[key] as int;
+        }
+      }
+    }
+    return result;
   }
 
   Future loadMap() async {

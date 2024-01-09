@@ -71,38 +71,41 @@ class _HomePageState extends State<HomePage> {
         physics: const NeverScrollableScrollPhysics(),
         children: _pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-              icon: const Icon(Icons.home), label: 'jianghu'.tr),
-          BottomNavigationBarItem(
-              icon: const Icon(Icons.home), label: 'character'.tr),
-          BottomNavigationBarItem(
-              icon: const Icon(Icons.home), label: 'bag'.tr),
-          BottomNavigationBarItem(
-              icon: const Icon(Icons.home), label: 'skill'.tr),
-          BottomNavigationBarItem(
-              icon: const Icon(Icons.home), label: 'quests'.tr),
-        ],
-        selectedIconTheme: const IconThemeData(opacity: 0.0, size: 0),
-        unselectedIconTheme: const IconThemeData(opacity: 0.0, size: 0),
-        selectedItemColor: ThemeStyle.selectedColor,
-        unselectedItemColor: ThemeStyle.unselectedColor,
-        selectedLabelStyle:
-            // const TextStyle(fontFamily: 'AaYangGuanQu', fontSize: 22),
-            ThemeStyle.textStyle
-                .copyWith(fontSize: 22, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: ThemeStyle.textStyle.copyWith(fontSize: 18),
-        onTap: (index) => {
-          setState(
-            () {
-              _selectedIndex = index;
-              _pageController.jumpToPage(_selectedIndex);
-            },
-          )
-        },
+      bottomNavigationBar: SizedBox(
+        height: 80,
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _selectedIndex,
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.home), label: 'jianghu'.tr),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.home), label: 'character'.tr),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.home), label: 'bag'.tr),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.home), label: 'skill'.tr),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.home), label: 'quests'.tr),
+          ],
+          selectedIconTheme: const IconThemeData(opacity: 0.0, size: 0),
+          unselectedIconTheme: const IconThemeData(opacity: 0.0, size: 0),
+          selectedItemColor: ThemeStyle.selectedColor,
+          unselectedItemColor: ThemeStyle.unselectedColor,
+          selectedLabelStyle:
+              // const TextStyle(fontFamily: 'AaYangGuanQu', fontSize: 22),
+              ThemeStyle.textStyle
+                  .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
+          unselectedLabelStyle: ThemeStyle.textStyle.copyWith(fontSize: 16),
+          onTap: (index) => {
+            setState(
+              () {
+                _selectedIndex = index;
+                _pageController.jumpToPage(_selectedIndex);
+              },
+            )
+          },
+        ),
       ),
     );
   }

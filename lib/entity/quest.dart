@@ -9,6 +9,7 @@ class Quest {
   final String description;
   final String questType;
   final int levelRequired;
+  final int preQuestRequired;
   final int startNPC;
   final int endNPC;
   final String startLine;
@@ -23,6 +24,7 @@ class Quest {
       this.description,
       this.questType,
       this.levelRequired,
+      this.preQuestRequired,
       this.startNPC,
       this.endNPC,
       this.startLine,
@@ -37,6 +39,7 @@ class Quest {
         description = json['description'],
         questType = json['quest_type'],
         levelRequired = json['level_required'],
+        preQuestRequired = json['pre_required'] ?? 0,
         startNPC = json['start_npc'],
         endNPC = json['end_npc'],
         startLine = json['start_line'],
@@ -87,9 +90,10 @@ class Quest {
               .firstWhere((e) => e['id'] == id);
       var mobs = mobsNeeded();
       for (var mob in mobs) {
-        var alreadyKill = (processingQuest['kills'] as List).firstWhere((e) => e['name'] == mob.name)['quantity'];
+        var alreadyKill = (processingQuest['kills'] as List)
+            .firstWhere((e) => e['name'] == mob.name)['quantity'];
         if (alreadyKill < mob.quantity) {
-              itemCompleted = false;
+          itemCompleted = false;
           break;
         }
       }

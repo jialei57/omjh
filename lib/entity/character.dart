@@ -3,6 +3,8 @@ import 'package:omjh/entity/interactable.dart';
 import 'package:get/get.dart';
 import 'package:omjh/entity/quest.dart';
 
+import '../common/shared.dart';
+
 class Character implements Interactable {
   final int? id;
   final String name;
@@ -12,6 +14,7 @@ class Character implements Interactable {
   final int? userId;
   DateTime? createdAt;
 
+  final shared = Get.put(Shared());
   Character(this.id, this.name, this.sex, this.map, this.status, this.userId);
 
   Character.fromJson(Map<String, dynamic> json)
@@ -106,19 +109,19 @@ class Character implements Interactable {
   }
 
   int getStr() {
-    return Common.initStr;
+    return Common.initStr + shared.getEquippedAttribute('str');
   }
 
   int getCon() {
-    return Common.initCon;
+    return Common.initCon + shared.getEquippedAttribute('con');
   }
 
   int getAgi() {
-    return Common.initAgi;
+    return Common.initAgi + shared.getEquippedAttribute('agi');
   }
 
   int getSpi() {
-    return Common.initSpi;
+    return Common.initSpi + shared.getEquippedAttribute('spi');
   }
 
   int getExpToLevelUp() {

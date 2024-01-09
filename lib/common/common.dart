@@ -1,3 +1,5 @@
+import '../entity/npc.dart';
+
 class Common {
   static const String authendicationToken = 'authendication_token';
   static const String currentCharacterIndex = 'current_character_index';
@@ -11,13 +13,13 @@ class Common {
   static const int initCon = 5;
   static const int initSpi = 5;
 
-  static String getIconForNpc(int id) {
-    switch (id) {
-      case 3:
+  static String getIconForNpc(Npc npc) {
+    switch (npc.name) {
+      case '鸡':
         return 'ic_chicken.png';
-      case 7:
+      case '狼':
         return 'ic_wolf.png';
-         case 8:
+      case '野猪':
         return 'ic_boar.png';
       default:
         return 'ic_not_found.png';

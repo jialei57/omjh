@@ -58,7 +58,7 @@ class _ChatBoxState extends State<ChatBox> {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height / 4.5;
+    final height = MediaQuery.of(context).size.height / 5.0;
     return Container(
       height: height,
       decoration: const BoxDecoration(

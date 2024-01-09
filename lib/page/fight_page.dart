@@ -295,7 +295,7 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
     if (fighter.isOwnSide) {
       icon = 'ic_me.png';
     } else if (fighter.char is Npc) {
-      icon = Common.getIconForNpc((fighter.char as Npc).id!);
+      icon = Common.getIconForNpc((fighter.char as Npc));
     }
 
     return Stack(
@@ -429,11 +429,11 @@ class _FightPageState extends State<FightPage> with TickerProviderStateMixin {
           borderRadius: const BorderRadius.all(Radius.circular(8))),
       child: Obx(() => ListView.builder(
           itemCount: _bloc.infoMessages.length,
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.only(bottom: 3),
           reverse: true,
           itemBuilder: ((context, index) {
             return Text(_bloc.infoMessages[index],
-                style: ThemeStyle.textStyle.copyWith(fontSize: 16));
+                style: ThemeStyle.textStyle.copyWith(fontSize: 14));
           }))),
     ));
   }
